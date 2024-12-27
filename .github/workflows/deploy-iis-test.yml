@@ -22,7 +22,7 @@ jobs:
 
     - name: Build with dotnet
       shell: cmd
-      run: dotnet build Application.csproj --configuration Release
+      run: dotnet build Application/Application.csproj --configuration Release
 
 
   # dependecy on the build job
@@ -35,7 +35,7 @@ jobs:
 
     - name: Publish with dotnet
       shell: cmd
-      run: dotnet publish Application.csproj --configuration Release --output .\myapp #./publish
+      run: dotnet publish Application/Application.csproj --configuration Release --output .\myapp #./publish
 
     - name: Deploy to IIS
       shell: cmd
