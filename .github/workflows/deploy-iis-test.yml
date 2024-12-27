@@ -35,12 +35,12 @@ jobs:
 
     - name: Publish with dotnet
       shell: cmd
-      run: dotnet publish Application/Application.csproj --configuration Release --output .\myapp #./publish
+      run: dotnet publish Application/Application.csproj --configuration Release --output .\flowbyte-app #./publish
 
     - name: Deploy to IIS
       shell: cmd
       run: |
         iisreset /stop
-        xcopy /s /y  .\myapp\* C:\inetpub\wwwroot\Flowbyte_Test\
+        xcopy /s /y  .\flowbyte-app\* C:\inetpub\wwwroot\Flowbyte_Test\
         iisreset /start
       
