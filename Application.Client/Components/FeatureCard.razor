@@ -1,0 +1,39 @@
+﻿
+
+<a href="@Href">
+    <div class="feature-card" >
+        <span class="icon">
+            <i class="fas @TitleIcon"></i>
+        </span>
+        <h3 class="feature-title">@Title</h3>
+        <p class="feature-description">@Description</p>
+        <div class="feature-meta">
+            <span class="status-badge @StatusColor">@Status</span>
+            <span class="meta-item">
+                <i class="fas @SubDescriptionIcon meta-icon"></i>
+                @SubDescription
+            </span>
+        </div>
+    </div>
+</a>
+
+
+
+@code {
+    [Parameter] public string Title { get; set; }
+    [Parameter] public string Description { get; set;  }
+    [Parameter] public string SubDescription { get; set;  }
+    [Parameter] public string Status { get; set;  }
+    [Parameter] public string TitleIcon { get; set; }
+    [Parameter] public string SubDescriptionIcon { get; set;  }
+
+    [Parameter] public string Href { get; set; }
+
+    public string StatusColor => Status switch
+    {
+        "Live" => "status-live",
+        "Coming Soon" => "status-coming-soon",
+        "Beta" => "status-beta",
+        _ => "status-live"
+    };
+}

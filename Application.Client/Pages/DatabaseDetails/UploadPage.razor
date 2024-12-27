@@ -1,0 +1,122 @@
+﻿@page "/upload"
+@inject IDataService DataService
+@rendermode InteractiveWebAssembly
+@inject ILogger<UploadPage> Logger
+@attribute [Authorize]
+
+
+
+
+<FluentInputFile Id="my-file-uploader"
+                 Mode="InputFileMode.SaveToTemporaryFolder"
+                 Multiple="true"
+                 MaximumFileCount="4"
+                 MaximumFileSize="@(10*1024*1024)"
+                 Accept=".csv"
+                 @bind-ProgressPercent="@ProgressPercent"
+                 OnInputFileChange="LoadFiles"
+                 Style="height: 300px; border: 1px dashed var(--accent-fill-rest);">
+    <ChildContent>
+        <label for="my-file-uploader">
+            <FluentIcon Value="@(new @Icons.Regular.Size24.ArrowUpload())" />
+        </label>
+
+        <div>
+            Drag files here you wish to upload,
+            or <label for="my-file-uploader">browse</label>
+            for them<span style="color: red;">*</span>.
+            <br />
+            <em>Maximum of 4 files allowed.</em>
+        </div>
+
+        <div>
+            <br />
+            <a href="#">Read more about our supported file formats.</a>
+        </div>
+    </ChildContent>
+</FluentInputFile>
+
+@if (loadedFiles.Any())
+{
+    <h4>File(s) uploaded:</h4>
+    <ul>
+        @foreach (var file in loadedFiles)
+        {
+            <li>
+                <b>@file.Name</b> 🔹
+                @($"{Decimal.Divide(file.Size, 1024):N} KB") 🔹
+                @file.ContentType 🔹
+                @file.Name
+            </li>
+        }
+    </ul>
+}
+
+
+
+
+
+@code {
+
+    private List<IBrowserFile> loadedFiles = new();
+    private int maxAllowedFiles = 3;
+    private bool isLoading;
+    private long maxFileSize = 1024 * 15;
+    int ProgressPercent = 0;
+    FluentInputFileEventArgs[] Files = Array.Empty<FluentInputFileEventArgs>();
+
+
+
+
+    private async Task LoadFiles(InputFileChangeEventArgs e)
+    {
+        isLoading = true;
+        loadedFiles.Clear();
+
+
+
+        foreach (var file in e.GetMultipleFiles(maxAllowedFiles))
+        {
+            ProgressPercent += 80 / e.FileCount;
+            try
+            {
+                loadedFiles.Add(file);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("File: {FileName} Error: {Error}",
+                    file.Name, ex.Message);
+            }
+        }
+
+        await UploadData();
+
+        ProgressPercent = 100;
+        await Task.Delay(1000);
+        ProgressPercent = 0;
+
+        isLoading = false;
+    }
+
+
+
+
+
+
+
+    private async Task UploadData()
+    {
+
+        Console.WriteLine("Handle File Upload");
+        foreach (var file in loadedFiles)
+        {
+
+            using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // 10 MB limit
+            using var reader = new StreamReader(stream);
+            var content = await reader.ReadToEndAsync();
+
+            Console.WriteLine(content);
+            await DataService.ProcessAndStoreFileAsync(file.Name, content);
+        }
+    }
+}

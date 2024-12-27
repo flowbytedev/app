@@ -1,0 +1,47 @@
+﻿@page "/"
+@using Application.Client.Components
+@inject IJSRuntime _jsRuntime
+@inject NavigationManager _navigationManager
+
+
+
+<PageTitle>Home</PageTitle>
+
+
+@*Add a title and subtitle*@
+<div class="title" style="margin-top:25px; margin-bottom:25px; display:grid; justify-content:center">
+    <h1>Data App</h1>
+    <p>Business Intelligence Platform</p>
+</div>
+
+<div class="grid-container">
+
+
+    <FeatureCard Title="Real-time Sales Dashboard"
+                 Description="Monitor your sales performance in real-time with interactive charts and key metrics." 
+                 Status="Live"
+                 SubDescription="Real-time updates"
+                 Href="rt/sales"
+                 TitleIcon="fa-chart-line"
+                 SubDescriptionIcon="fa-sync-alt" />
+
+    <FeatureCard Title="Data Exploration Tools"
+                 Description="Dive deep into your data with advanced filtering, sorting, and visualization tools. Uncover insights and patterns in your business data."
+                 Status="Coming Soon"
+                 SubDescription="Advanced Analytics" 
+                 TitleIcon="fa-table"
+                 SubDescriptionIcon="fa-chart-bar" />
+
+
+    <FeatureCard Title="Data Sharing"
+                 Description="Sharing Data with your colleagues, adding comments and discussing about it."
+                 Status="Coming Soon"
+                 SubDescription="Collaboration" 
+                 TitleIcon="fa-database"
+                 SubDescriptionIcon="fa-person" />
+
+</div>
+
+
+
+

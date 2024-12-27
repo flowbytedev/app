@@ -1,0 +1,146 @@
+﻿@page "/admin/users/{userId}"
+@using System.ComponentModel.DataAnnotations
+@inject NavigationManager _navigationManager
+@inject HttpClient _client
+@inject StateContainer _stateContainer
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@attribute [Authorize]
+
+
+<PageTitle>User Details</PageTitle>
+
+<div class="">
+    <h3>User Details</h3>
+
+
+    <FluentGrid Spacing="3" AdaptiveRendering="true" Justify="@JustifyContent.FlexStart">
+        <FluentGridItem xs="12" sm="6" HiddenWhen="GridItemHidden.SmAndDown">
+
+            <EditForm Model="User" OnValidSubmit="HandleValidSubmit">
+
+                <FluentTextField Label="User Name" @bind-Value="UserInput.UserName" Style="width: 100%;" Required="true" Disabled="@IsDisabled" />
+
+                <FluentTextField Label="Email" @bind-Value="UserInput.Email" Type="email" Style="width: 100%;" Required="true" Disabled="@IsDisabled" />
+
+                @if(userId == "add")
+                {
+                    <FluentTextField Label="Password" @bind-Value="UserInput.Password" TextFieldType="TextFieldType.Password" Style="width: 100%;" Required="true" Disabled="@IsDisabled" />
+
+                    <FluentTextField Label="Password" @bind-Value="UserInput.ConfirmPassword" TextFieldType="TextFieldType.Password" Style="width: 100%;" Required="true" Disabled="@IsDisabled" />
+                }
+
+
+                <div style="margin-top: 20px;">
+
+                    <FluentButton Clicked="ResetPassword" Appearance="Appearance.Outline" Disabled="@IsDisabled">
+                        Reset Password
+                    </FluentButton>
+
+
+                    <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" Disabled="@IsDisabled">
+                        Save Changes
+                    </FluentButton>
+
+                    <FluentButton Clicked="CancelEdit" Appearance="Appearance.Stealth" Disabled="@IsDisabled">
+                        Cancel
+                    </FluentButton>
+                </div>
+
+            </EditForm>
+        </FluentGridItem>
+    </FluentGrid>
+
+</div>
+
+@code {
+
+    [Parameter] public string userId { get; set; }
+
+    private ApplicationUser User = new ApplicationUser();
+
+    private UserInputModel UserInput = new UserInputModel();
+
+    // private bool isAdmin = true;
+
+    private bool IsDisabled => userId.ToLower() != "add";
+
+    protected override async Task OnInitializedAsync()
+    {
+
+
+        if (userId.ToLower() != "add")
+        {
+            User = await _client.GetFromJsonAsync<ApplicationUser>($"api/users/{userId}");
+            UserInput = new UserInputModel
+                {
+                    UserName = User.UserName,
+                    Email = User.Email
+                };
+        }
+        else
+        {
+            Console.WriteLine("Add a new user");
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        // await UserService.UpdateUserAsync(user);
+
+        Console.WriteLine("Valid Submit");
+
+        // add company to the request header
+        // first check if the company is set in state manager
+        if (_stateContainer.Company != null)
+        {
+            _client.DefaultRequestHeaders.Remove("X-Company-ID");
+            _client.DefaultRequestHeaders.Add("X-Company-ID", _stateContainer.Company.Id);
+        }
+        else
+        {
+            Console.WriteLine("Company is null");
+            return;
+        }
+
+
+        if (userId.ToLower() == "add")
+        {
+            Console.WriteLine("Add a new user");
+            // await UserService.AddUserAsync(user);
+            await _client.PostAsJsonAsync("api/users", UserInput);
+
+            _navigationManager.NavigateTo("/admin/users");
+        }
+        else
+        {
+            // await UserService.UpdateUserAsync(user);
+        }
+        // NavigationManager.NavigateTo("/admin/users");
+    }
+
+    private void CancelEdit()
+    {
+        _navigationManager.NavigateTo("/admin/users");
+    }
+
+    private async Task ResetPassword()
+    {
+        bool success = true;// await UserService.ResetPasswordAsync(user.UserName);
+        if (success)
+        {
+            // Display a notification
+            Console.WriteLine("Password reset successful.");
+        }
+        else
+        {
+            // Display a failure notification
+            Console.WriteLine("Failed to reset password.");
+        }
+    }
+
+
+}
+
+
+
+

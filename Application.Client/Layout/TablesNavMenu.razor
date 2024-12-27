@@ -1,0 +1,154 @@
+﻿@using System.Security.Claims
+@using System.Text.Json
+
+@rendermode InteractiveWebAssembly
+
+@* @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false)) *@
+
+@implements IDisposable
+
+@inject NavigationManager NavigationManager
+
+@inject StateContainer _stateContainer
+@inject HttpClient _client
+@inject ClientAuthenticationDetail _clientAuthenticationDetail
+
+
+<div class="navmenu">
+    <input type="checkbox" title="Menu expand/collapse toggle" id="navmenu-toggle" class="navmenu-icon" />
+    <label for="navmenu-toggle" class="navmenu-icon"><FluentIcon Value="@(new Icons.Regular.Size20.Navigation())" Color="Color.Fill" /></label>
+    <nav class="sitenav" aria-labelledby="main-menu" >
+        <FluentNavMenu Id="main-menu" Width="250" Collapsible="true" Title="Navigation menu" @bind-Expanded="expanded" CustomToggle="true">
+            <FluentNavLink Href="/" Match="NavLinkMatch.All" Icon="@(new Icons.Regular.Size20.Home())" IconColor="Color.Accent">Home</FluentNavLink>
+
+
+            @if (Databases is not null && Databases.Count > 0 && String.IsNullOrEmpty(Database.Name))
+            {
+                @foreach (var database in Databases)
+                {
+                    <FluentNavLink Icon="@(new Icons.Regular.Size20.Table())" IconColor="Color.Accent" @onclick="async () => await SelectDatabaseAsync(database)">@database.Host - @database.Name</FluentNavLink>
+                }
+            }
+            else{
+                @if(Tables is not null && Tables.Count > 0)
+                {
+                    @foreach(var schema in Schemas)
+                    {
+                        <FluentNavGroup Title="@schema">
+                            @foreach (var table in Tables.Where(t => t.Schema == schema))
+                            {
+                                <FluentNavLink Href='@($"tables/{Database.Host.Replace(".", "_")}/{Database.Name}/{schema}/{table.Name}")' Icon="@(new Icons.Regular.Size20.Table())" IconColor="Color.Accent">@table.Name</FluentNavLink>
+                            }
+                        </FluentNavGroup>
+                    }
+                }
+            }
+
+
+        </FluentNavMenu>
+    </nav>
+</div>
+
+@code {
+    private bool expanded = true;
+
+    private string? currentUrl;
+
+    private List<Table> Tables { get; set; }
+    private List<string> Schemas { get; set; }
+    private Database Database { get; set; } = new();
+    private List<Database> Databases { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+
+        var userId = await _clientAuthenticationDetail.GetUserId();
+
+        if(_stateContainer.Company == null && await _clientAuthenticationDetail.UserIsAuthenticated())
+        {
+            _stateContainer.Company = await GetUserDefaultCompany(userId);
+
+
+        }
+        else
+        {
+            if (!await _clientAuthenticationDetail.UserIsAuthenticated())
+                Console.WriteLine("Customers INITIALIZE: User not authencated");
+        }
+        // if(_stateContainer.Company is not null)
+        // {
+        //     Tables = await _client.GetFromJsonAsync<List<Table>>("api/database/tables");
+
+        //     Schemas = Tables.Select(t => t.Schema).Distinct().ToList();
+        // }
+
+        if (_stateContainer.Company is not null)
+        {
+
+            if (String.IsNullOrEmpty(Database.Name))
+            {
+                Databases = await _client.GetFromJsonAsync<List<Database>>("api/database/databases");
+            }
+            // else {
+            //     Tables = await _client.GetFromJsonAsync<List<Table>>("api/database/tables");
+
+            //     Schemas = Tables.Select(t => t.Schema).Distinct().ToList();
+            // }
+
+        }
+
+
+        _stateContainer.OnChange += StateHasChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+
+
+    private async Task SelectDatabaseAsync(Database database)
+    {
+        Database = database;
+
+        // serialize the database object
+        var databaseJson = JsonSerializer.Serialize(database);
+        // add database to the body
+        _client.DefaultRequestHeaders.Remove("Database");
+        _client.DefaultRequestHeaders.Add("Database", databaseJson);
+
+        Tables = await _client.GetFromJsonAsync<List<Table>>("api/database/tables");
+
+        Schemas = Tables.Select(t => t.Schema).Distinct().ToList();
+
+        
+
+
+        StateHasChanged();
+    }
+
+
+
+    private async Task<Company> GetUserDefaultCompany(string userId)
+    {
+        var uri = _client.BaseAddress;
+        // var companies = await _companyService.GetCompanies(userId);
+
+        // add userId to the header
+        _client.DefaultRequestHeaders.Add("userId", userId);
+
+        var companies = await _client.GetFromJsonAsync<List<Company>>("api/companies");
+
+        // // get the first company
+        return companies.FirstOrDefault();
+    }
+
+}

@@ -1,0 +1,99 @@
+﻿@using System.Security.Claims
+
+@* @rendermode InteractiveWebAssembly *@
+
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@implements IDisposable
+
+@inject NavigationManager NavigationManager
+
+@inject StateContainer _stateContainer
+@inject HttpClient _client
+@inject ClientAuthenticationDetail _clientAuthenticationDetail
+
+
+<div class="navmenu">
+    <input type="checkbox" title="Menu expand/collapse toggle" id="navmenu-toggle" class="navmenu-icon" />
+    <label for="navmenu-toggle" class="navmenu-icon"><FluentIcon Value="@(new Icons.Regular.Size20.Navigation())" Color="Color.Fill" /></label>
+    <nav class="sitenav" aria-labelledby="main-menu">
+        <FluentNavMenu Id="main-menu" Width="250" Collapsible="true" Title="Navigation menu" @bind-Expanded="expanded" CustomToggle="true">
+            <FluentNavLink Href="/" Match="NavLinkMatch.All" Icon="@(new Icons.Regular.Size20.Home())" IconColor="Color.Accent">Home</FluentNavLink>
+            <FluentNavLink Href="rt/sales" Icon="@(new Icons.Regular.Size20.GanttChart())" IconColor="Color.Accent">Real Time Sales</FluentNavLink>
+            @* <FluentNavLink Href="tables" Icon="@(new Icons.Regular.Size20.Person())" IconColor="Color.Accent">Tables</FluentNavLink> *@
+            @* <FluentNavLink Href="admin/users" Icon="@(new Icons.Regular.Size20.Person())" IconColor="Color.Accent">Users</FluentNavLink> *@
+            @* <FluentNavLink Href="auth" Icon="@(new Icons.Regular.Size20.LockClosedKey())" IconColor="Color.Accent">Auth Required</FluentNavLink> *@
+            <AuthorizeView>
+                <Authorized>
+                    <FluentNavLink Href="Account/Manage">@context.User.Identity?.Name</FluentNavLink>
+                    <form action="Account/Logout" method="post">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                        <FluentButton Type="ButtonType.Submit" Style="width: 100%;">Logout</FluentButton>
+                    </form>
+                </Authorized>
+                <NotAuthorized>
+                    <FluentNavLink Href="Account/Register">Register</FluentNavLink>
+                    <FluentNavLink Href="Account/Login">Login</FluentNavLink>
+                </NotAuthorized>
+            </AuthorizeView>
+        </FluentNavMenu>
+    </nav>
+</div>
+
+@code {
+    private bool expanded = true;
+
+    private string? currentUrl;
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+
+        var userId = await _clientAuthenticationDetail.GetUserId();
+
+        if(_stateContainer.Company == null && await _clientAuthenticationDetail.UserIsAuthenticated())
+        {
+            _stateContainer.Company = await GetUserDefaultCompany(userId);
+
+            // Console.WriteLine($"NAVMENU ONINITIALIZED: {_stateContainer.Company.Id}");
+        }
+        else
+        {
+            if (!await _clientAuthenticationDetail.UserIsAuthenticated())
+                Console.WriteLine("Customers INITIALIZE: User not authencated");
+        }
+
+        
+
+        _stateContainer.OnChange += StateHasChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+
+
+
+
+    private async Task<Company> GetUserDefaultCompany(string userId)
+    {
+        var uri = _client.BaseAddress;
+
+        // add userId to the header
+        _client.DefaultRequestHeaders.Add("userId", userId);
+
+        var companies = await _client.GetFromJsonAsync<List<Company>>("api/companies");
+
+        // // get the first company
+        return companies.FirstOrDefault();
+    }
+
+}

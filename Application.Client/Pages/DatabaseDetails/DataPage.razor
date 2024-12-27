@@ -1,0 +1,293 @@
+﻿@page "/tables/{Host:nonfile?}/{DatabaseName:nonfile?}/{SchemaName:nonfile?}/{TableName:nonfile?}"
+@inject HttpClient _client
+@using System.Linq.Expressions
+@using System.Text.Json
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@* @rendermode InteractiveWebAssembly *@
+@layout TablesLayout
+@attribute [Authorize]
+
+
+@if(String.IsNullOrEmpty(SchemaName) && String.IsNullOrEmpty(TableName))
+{
+
+}
+else
+{
+    <div style="padding:10px;min-width:800px">
+        <FluentToolbar id="toolbar-fluent-components-two" style="width:100%">
+
+            <h3 slot="label" style="margin-right:10px;">@TableName.Replace("[", "").Replace("]", "")</h3>
+
+            <FluentButton IconEnd="@(new Icons.Regular.Size16.Filter())"
+            Title="Filter"
+            Appearance="Appearance.Stealth"
+            OnClick="@(OnShowFilterClick)" />
+
+
+        </FluentToolbar>
+    </div>
+
+}
+
+
+
+@if(Columns is not null && Columns.Count() > 0)
+{
+
+    <FilterComponent ShowComponent="ShowFilterSection" Columns="@Columns" OnQueryGenerated="HandleQueryGenerated" />
+
+
+}
+
+
+
+@if (FilteredDataQueryable is not null && FilteredDataQueryable.Count() > 0 && Columns.Count() > 0)
+{
+
+    <div style="height: 80%; overflow:auto; overflow-x:scroll!important;  table-layout:fixed; width:100%; background-color:white;" tabindex="-1">
+        <FluentDataGrid                 
+        role="grid"
+        Items="FilteredDataQueryable"
+        ResizableColumns=true
+        AutoFit="true"
+        ShowHover="true"
+        OnRowDoubleClick="@(()=>Console.WriteLine("Row double clicked!"))"
+        ItemSize="36"
+        Loading="IsLoading"
+        TGridItem="Dictionary<string, object>">
+
+
+
+
+
+            @foreach (var column in Columns)
+            {
+                Console.WriteLine("TABLE ITERATION");
+
+                <TemplateColumn Style="min-width:120px" Title="@column" Tooltip="true" Align="Align.Start" Sortable="true" >
+
+                    <ChildContent>
+                        @*if the column is password, show *******@
+                        @if (column.ToLower().Contains("password"))
+                        {
+                            <span>*******</span>
+                        }
+                        else
+                        {
+                            <span>@(context.TryGetValue(column, out var value) ? value : "N/A")</span>
+                        }
+                    </ChildContent>
+
+                </TemplateColumn>
+
+
+
+            }
+
+
+
+
+
+
+    </FluentDataGrid>
+
+
+    </div>
+
+
+    <FluentGrid Spacing="1" Justify="JustifyContent.FlexEnd">
+
+        <FluentGridItem>
+            <FluentButton IconStart="@(new Icons.Regular.Size20.ChevronDoubleLeft())" OnClick="GoToFirstPage" Disabled="@(pagination.CurrentPageIndex == 0 ? true : false)" />
+        </FluentGridItem>
+
+        <FluentGridItem>
+            <FluentButton IconStart="@(new Icons.Regular.Size20.ChevronLeft())" OnClick="GoToPreviousPageAsync" Disabled="@(pagination.CurrentPageIndex == 0 ? true : false)" />
+        </FluentGridItem>
+
+        <FluentGridItem Style="margin-top:5px">
+
+            @(pagination.CurrentPageIndex + 1)
+
+        </FluentGridItem>
+
+        <FluentGridItem>
+            <FluentButton IconStart="@(new Icons.Regular.Size20.ChevronRight())" OnClick="GoToNextPageAsync" Disabled="@(FilteredDataQueryable.Count() < 100 ? true : false)"/>
+        </FluentGridItem>
+
+    </FluentGrid>
+}
+
+
+
+
+
+@code {
+    [Parameter] public string? Host { get; set; } = string.Empty;
+    [Parameter] public string? DatabaseName { get; set; } = string.Empty;
+    [Parameter]  public string? SchemaName { get; set; } = string.Empty;
+    [Parameter] public string? TableName { get; set; } = string.Empty;
+
+    public IEnumerable<string> Columns { get; set; } = Enumerable.Empty<string>();
+
+    PaginationState pagination = new PaginationState { ItemsPerPage = 100 };
+
+    public bool ShowFilterSection { get; set;  }
+
+
+
+    private List<Dictionary<string, object>> dataTable;
+    private List<Dictionary<string, string>> FilterDetails = new List<Dictionary<string, string>>();
+    // private List<Dictionary<string, object>> FilteredData { get; set; } = new List<Dictionary<string, object>>();
+    private IQueryable<Dictionary<string, object>> FilteredDataQueryable { get; set; }
+
+    public string GridTemplateColumns { get; set; }
+    public string FilterQuery { get; set; } = "";
+
+    // Dictionary to store current filter values for each column
+    private Dictionary<string, string> FilterValues = new Dictionary<string, string>();
+
+    private bool IsLoading { get; set; }
+
+
+
+    private async Task GoToNextPageAsync()
+    {
+        IsLoading = true;
+        await pagination.SetCurrentPageIndexAsync(pagination.CurrentPageIndex + 1);
+
+        await GetDataFromTable();
+
+        IsLoading = false;
+    }
+
+    private async Task GoToFirstPage()
+    {
+        IsLoading = true;
+
+        await pagination.SetCurrentPageIndexAsync(0);
+
+        await GetDataFromTable();
+
+        IsLoading = false;
+    }
+
+    private async Task GoToPreviousPageAsync()
+    {
+        IsLoading = true;
+
+        if(pagination.CurrentPageIndex > 0)
+        {
+            await pagination.SetCurrentPageIndexAsync(pagination.CurrentPageIndex - 1);
+
+            await GetDataFromTable();
+        }
+
+        IsLoading = false;
+
+    }
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        if (!String.IsNullOrEmpty(SchemaName) && !String.IsNullOrEmpty(TableName))
+        {
+
+            FilterQuery = "";
+
+            await GetDataFromTable();
+        }
+    }    
+
+
+    private void OnShowFilterClick() => ShowFilterSection = ShowFilterSection == true ? false : true;
+
+
+
+    private async Task GetDataFromTable()
+    {
+
+
+        if (!String.IsNullOrEmpty(FilterQuery))
+        {
+            // remove the old filterquery from the header
+            _client.DefaultRequestHeaders.Remove("FilterQuery");
+
+            // add filterquery to the header
+            _client.DefaultRequestHeaders.Add("FilterQuery", FilterQuery);
+        }
+
+        Database database = new Database()
+        {
+            Host = Host.Replace("_", "."),
+            Name = DatabaseName,
+            Description = ""
+        };
+
+        // add database to the header
+        var databaseJson = JsonSerializer.Serialize(database);
+        _client.DefaultRequestHeaders.Remove("database");
+        _client.DefaultRequestHeaders.Add("database", databaseJson);
+
+
+        Table table = new Table()
+        {
+            Schema = SchemaName,
+            Name = TableName
+        };
+
+        var tableJson = JsonSerializer.Serialize(table);
+        _client.DefaultRequestHeaders.Remove("table");
+        _client.DefaultRequestHeaders.Add("table", tableJson);
+
+
+
+        dataTable = await _client.GetFromJsonAsync<List<Dictionary<string, object>>>($"api/database/tables/data?pageNumber={pagination.CurrentPageIndex}");
+
+        // FilteredData = dataTable;
+        FilteredDataQueryable = dataTable?.AsQueryable();
+        Columns = GetColumnNames();
+
+        // StateHasChanged();
+
+
+
+    }
+
+
+
+    // Callback method to handle query generated in the component
+    private async void HandleQueryGenerated(string query)
+    {
+        FilterQuery = query;
+
+        // await pagination.SetCurrentPageIndexAsync(0);
+
+        await GetDataFromTable();
+
+        
+    }
+
+
+
+
+
+    // Get all column names dynamically from the first row
+    private IEnumerable<string> GetColumnNames()
+    {
+        if (dataTable != null && dataTable.Count > 0)
+        {
+            var firstRow = (IDictionary<string, object>)dataTable[0];
+
+            // generate 1fr 1fr based on number of columns
+            GridTemplateColumns = string.Join(" ", Enumerable.Repeat("5fr", firstRow.Count));
+            StateHasChanged();
+            return firstRow.Keys;
+        }
+
+        return Enumerable.Empty<string>();
+    }
+}

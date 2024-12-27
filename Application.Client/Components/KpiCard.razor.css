@@ -1,0 +1,72 @@
+﻿
+
+
+.kpi-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    width: 300px;
+    border: 1px solid #E5E7EB;
+    font-family: system-ui, -apple-system, sans-serif;
+    margin-bottom: 25px;
+}
+
+.kpi-label {
+    color: #6B7280;
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+}
+
+.kpi-value {
+    color: #111827;
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 16px;
+}
+
+.kpi-trend {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.trend-positive {
+    color: #059669;
+    background: #ECFDF5;
+    padding: 4px 8px;
+    border-radius: 9999px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.trend-negative {
+    color: #DC2626;
+    background: #FEE2E2;
+    padding: 4px 8px;
+    border-radius: 9999px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.trend-neutral {
+    color: #6B7280;
+    background: #F3F4F6;
+    padding: 4px 8px;
+    border-radius: 9999px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.trend-text {
+    color: #6B7280;
+    font-size: 14px;
+}
+
+.trend-arrow {
+    display: inline-block;
+    margin-right: 4px;
+}
