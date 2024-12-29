@@ -70,7 +70,7 @@
         <LineChart Title="Real Time Sales" />
     </FluentGridItem>
 
-    <FluentGridItem xs="12" sm="4" style="overflow-x:auto; background-color: white; border-radius: 10px; padding:10px; margin-top:5px; margin-bottom:5px; min-height:500px">
+    <FluentGridItem xs="12" sm="4" style="overflow-x:auto; background-color: white; border-radius: 10px; padding:10px; margin-top:5px; margin-bottom:5px; min-height:575px;max-height: 575px;">
         <div class="table-label">Sales Data By Store</div>
 
         <FluentDataGrid @ref="grid" Items="@SalesLinesQuery" TGridItem="SalesLineRealTime">
