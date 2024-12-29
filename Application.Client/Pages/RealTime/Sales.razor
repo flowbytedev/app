@@ -142,7 +142,7 @@
     {
 
         var salesLinesTemp = await _client.GetFromJsonAsync<List<SalesLineRealTime>>("api/rt/sales/agg/store");
-        salesLinesTemp = salesLinesTemp.Where(s => !String.IsNullOrEmpty(SelectedScheme) ? s.Scheme == SelectedScheme : true).ToList();
+        // salesLinesTemp = salesLinesTemp.Where(s => !String.IsNullOrEmpty(SelectedScheme) ? s.Scheme == SelectedScheme : true).ToList();
 
 
         SalesLinesQuery = salesLinesTemp.AsQueryable();
@@ -208,10 +208,6 @@
             await grid.RefreshDataAsync();
 
 
-            // ChartLabels = FilteredData.Select(d => d.First().DateTime?.ToString("HH:mm:ss")).ToArray(); //yyyy-MM-dd HH:mm
-            // ChartValues = FilteredData.Select(d => d.Sum(x => x.NetAmountAcy)).ToArray();
-
-
             await UpdateChartAsync();
             await InvokeAsync(StateHasChanged);
 
@@ -244,8 +240,6 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        // ChartLabels = FilteredData.Select(d => d.First().DateTime?.ToString("HH:mm:ss")).ToArray(); //yyyy-MM-dd HH:mm
-        // ChartValues = FilteredData.Select(d => d.Sum(x => x.NetAmountAcy)).ToArray();
 
         if (firstRender)
         {
@@ -268,13 +262,6 @@
     private async void FilterData()
     {
 
-
-
-
-        Console.WriteLine($"TEST00001   {SelectedScheme}");
-
-
-
         // Filter the Sales list in-place to include only "HAPPY" scheme
         FilteredData = messages
             .Select(innerList => innerList
@@ -282,7 +269,6 @@
                 .ToList())
             .Where(innerList => innerList.Any()) 
             .ToList();
-
 
         SalesLinesQuery = FilteredData.LastOrDefault().AsQueryable();
 
@@ -294,11 +280,11 @@
         await UpdateKpiCardsAsync();
 
 
-        // await InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged);
     }
 
 
-    
+
 
 
     private async Task JSPrint(object obj)
@@ -326,8 +312,23 @@
 
     private async Task LoadChartAsync()
     {
-        var labels = FilteredData.Select(d => d.First().DateTime?.ToString("HH:mm:ss")).ToArray(); //yyyy-MM-dd HH:mm
-        var values = FilteredData.Select(d => d.First().NetAmountAcy).ToArray();
+        var labels = new string[] { }; // Adjust as necessary
+        var values = new decimal[] { }; // Adjust as necessary
+
+
+        if(FilteredData is not null && FilteredData.Count() > 0)
+        {
+            // get the sum of all labels group by their time
+            labels = FilteredData.TakeLast(25).Aggregate((a, b) => a.Concat(b).ToList())
+                .GroupBy(d => d.DateTime?.ToString("HH:mm:ss"))
+                .Select(d => d.First().DateTime?.ToString("HH:mm:ss")).ToArray();
+
+
+            values = FilteredData.TakeLast(25).Aggregate((a, b) => a.Concat(b).ToList())
+                .GroupBy(d => d.DateTime?.ToString("HH:mm:ss"))
+                .Select(d => d.Sum(x => x.NetAmountAcy)).ToArray();
+        }
+        
 
         var chartConfig = new
         {
