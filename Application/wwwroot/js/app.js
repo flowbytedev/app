@@ -24,6 +24,15 @@ function updateChart(chartId, newLabels, newData) {
 }
 
 
+// reset chart
+function resetChart(chartId) {
+    const chart = charts[chartId];
+    if (chart) {
+        chart.destroy();
+    }
+}
+
+
 // write a function that takes a parameter value and updates the elements
 // the value is in div element
 // the last updated is in span element
@@ -32,8 +41,6 @@ function updateRealTimeSalesKPI(valueId, lastUpdatedId, value, lastUpdated) {
     const valueElement = document.getElementById(valueId);
     const lastUpdatedElement = document.getElementById(lastUpdatedId);
 
-    console.log(value);
-    console.log(lastUpdated);
 
     if (valueElement) {
         valueElement.textContent = value;

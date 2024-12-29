@@ -20,6 +20,10 @@ public class SalesLineRealTime
     [JsonPropertyName("store_code")]
     public string StoreCode { get; set; }
 
+    [JsonPropertyName("total_transactions")]
+    [Column("total_transactions")]
+    public int TotalTransactions { get; set; }
+
     [JsonPropertyName("net_amount_acy")]
     [Column("net_amount_acy", TypeName = "decimal(38, 20)")]
     public decimal NetAmountAcy { get; set; }

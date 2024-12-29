@@ -4,11 +4,11 @@
 .kpi-card {
     background: white;
     border-radius: 12px;
-    padding: 24px;
+    padding: 18px;
     width: 300px;
     border: 1px solid #E5E7EB;
     font-family: system-ui, -apple-system, sans-serif;
-    margin-bottom: 25px;
+    margin-bottom: 10px;
 }
 
 .kpi-label {
@@ -22,10 +22,10 @@
 
 .kpi-value {
     color: #111827;
-    font-size: 36px;
-    font-weight: 700;
+    font-size: 32px;
+    font-weight: 500;
     line-height: 1;
-    margin-bottom: 16px;
+    margin-bottom: 10px;
 }
 
 .kpi-trend {
@@ -39,7 +39,7 @@
     background: #ECFDF5;
     padding: 4px 8px;
     border-radius: 9999px;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 500;
 }
 
@@ -48,7 +48,7 @@
     background: #FEE2E2;
     padding: 4px 8px;
     border-radius: 9999px;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 500;
 }
 
@@ -57,7 +57,7 @@
     background: #F3F4F6;
     padding: 4px 8px;
     border-radius: 9999px;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 500;
 }
 

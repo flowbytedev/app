@@ -3,7 +3,7 @@
 
 <div class="kpi-card">
     <div class="kpi-label">@Title</div>
-    <div id="rts-kpi-value" class="kpi-value">
+    <div id="@($"rts-kpi-value-{Id}")" class="kpi-value">
         @* @Value *@
     </div>
     <div class="kpi-trend">
@@ -17,7 +17,7 @@
         }
 
         <span class="trend-text">last updated</span>
-        <span id="rts-kpi-last-updated" class="trend-neutral">
+        <span id="@($"rts-kpi-last-updated-{Id}")" class="trend-neutral">
             @* @(LastUpdated.ToString("yyyy-MM-dd hh:mm:ss")) *@
         </span>
     </div>
@@ -31,13 +31,14 @@
 
     // [Parameter]
     // public string Value { get; set; } = "0";
+    [Parameter] public string Id { get; set; } = "";
 
     [Parameter] public bool HasComparison { get; set; } = false;
     [Parameter] public string Trend { get; set; } = "trend-positive"; // or it can be trend-negative, trend-neutral
                                                                       // [Parameter] public DateTime LastUpdated { get; set; } = DateTime.Now;
 
-    private string ValueElementId { get; } = "rts-kpi-value";// + Guid.NewGuid().ToString();
-    private string LastUpdatedElementId { get; } = "rts-kpi-last-updated";// + Guid.NewGuid().ToString();
+    private string ValueElementId => $"rts-kpi-value-{Id}";// + Guid.NewGuid().ToString();
+    private string LastUpdatedElementId => $"rts-kpi-last-updated-{Id}";// + Guid.NewGuid().ToString();
 
 
     public async Task UpdateKpiAsync(string value, string lastUpdated)

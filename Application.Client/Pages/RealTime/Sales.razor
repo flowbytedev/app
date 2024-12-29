@@ -15,12 +15,50 @@
 
 <PageTitle>Real Time Sales</PageTitle>
 
-<Toolbar Title="Real Time Sales" />
+<Toolbar Title="Real Time Sales" HasFilter="true" OnFilterClick="OpenFilterPanel" />
 
-@if(LastUpdated is not null)
+@if(ShowFilters)
 {
-    <KpiCard @ref="KpiCardRef" Title="Total Amount"/>
+    <div style="padding: 10px; margin-bottom: 25px;background-color: white;border-radius: 10px;">
+        @if(StoreSchemes is not null)
+        {
+            <FluentSelect Label="Select Scheme" 
+            Appearance="Appearance.Filled"
+            TOption="string"
+            Items="@StoreSchemes"
+            Immediate="true"
+            @bind-Value="@SelectedScheme"
+            SelectedOptionChanged="FilterData"
+            />
+        }
+
+    </div>
 }
+
+
+<FluentGrid Spacing="1" AdaptiveRendering="true" Justify="@JustifyContent.FlexStart" >
+    <FluentGridItem xs="12" sm="4" >
+        @if(LastUpdated is not null)
+        {
+            <KpiCard @ref="KpiCardRef" Id="amount" Title="Total Amount"/>
+        }
+    </FluentGridItem>
+
+    <FluentGridItem xs="12" sm="4">
+        @if (TotalTransactions > 0)
+        {
+            <KpiCard @ref="KpiTotalTransactionsRef" Id="transactions" Title="Total Transactions" />
+        }
+    </FluentGridItem>
+
+    <FluentGridItem xs="12" sm="4">
+        @if (TotalTransactions > 0)
+        {
+            <KpiCard @ref="KpiAverageBasketRef" Id="basket" Title="Average Basket" />
+        }
+    </FluentGridItem>
+</FluentGrid>
+
 
 
 
@@ -29,20 +67,14 @@
 
     <FluentGridItem xs="12" sm="8" >
 
-        <LineChart Title="Real Time Sales" Labels="@ChartLabels" Values="@ChartValues" />
+        <LineChart Title="Real Time Sales" />
     </FluentGridItem>
-    <FluentGridItem xs="12" sm="4" style="height: 500px; overflow-x:auto; background-color: white; border-radius: 10px; padding:10px; margin-top:15px">
+
+    <FluentGridItem xs="12" sm="4" style="overflow-x:auto; background-color: white; border-radius: 10px; padding:10px; margin-top:5px; margin-bottom:5px; min-height:500px">
         <div class="table-label">Sales Data By Store</div>
 
         <FluentDataGrid @ref="grid" Items="@SalesLinesQuery" TGridItem="SalesLineRealTime">
-            <PropertyColumn Property="@(c => c.CompanyId)" InitialSortDirection=SortDirection.Descending Sortable="true">
-                <ColumnOptions>
-                    <div class="search-box">
-                        <FluentSearch type="search" Autofocus=true @bind-Value=SelectedStore @oninput="HandleStoreFilter" @bind-Value:after="HandleClear" Placeholder="Store Name..." />
-                    </div>
-                </ColumnOptions>
-            </PropertyColumn>
-            <PropertyColumn Property="@(c => c.Scheme)" InitialSortDirection=SortDirection.Descending Sortable="true">
+            <PropertyColumn Title="Scheme" Property="@(c => c.Scheme)" InitialSortDirection=SortDirection.Descending Sortable="true">
                 <ColumnOptions>
                     <div class="search-box">
                         <FluentSearch type="search" Autofocus=true @bind-Value=SelectedStore @oninput="HandleStoreFilter" @bind-Value:after="HandleClear" Placeholder="Store Name..." />
@@ -50,7 +82,7 @@
                 </ColumnOptions>
             </PropertyColumn>
 
-            <PropertyColumn Property="@(c => c.StoreCode)" InitialSortDirection=SortDirection.Descending Sortable="true" Filtered="!string.IsNullOrWhiteSpace(SelectedStore)">
+            <PropertyColumn Title="Store" Property="@(c => c.StoreCode)" InitialSortDirection=SortDirection.Descending Sortable="true" Filtered="!string.IsNullOrWhiteSpace(SelectedStore)">
                 <ColumnOptions>
                     <div class="search-box">
                         <FluentSearch type="search" Autofocus=true @bind-Value=SelectedStore @oninput="HandleStoreFilter" @bind-Value:after="HandleClear" Placeholder="Store Name..." />
@@ -58,8 +90,11 @@
                 </ColumnOptions>
             </PropertyColumn>
 
-            <PropertyColumn Property="@(c => c.NetAmountAcy.ToString("##,##"))" Title="Total Sales" InitialSortDirection=SortDirection.Descending Sortable="true" IsDefaultSortColumn=true>
-            </PropertyColumn>
+            <PropertyColumn Property="@(c => c.NetAmountAcy.ToString("##,##"))" Title="Sales" InitialSortDirection=SortDirection.Descending Sortable="true"  />
+
+            <PropertyColumn Property="@(c => c.TotalTransactions.ToString("##,##"))" Title="Transactions" InitialSortDirection=SortDirection.Descending Sortable="true" />
+
+            <PropertyColumn Property="@(c => (c.NetAmountAcy / c.TotalTransactions).ToString("##,##"))" Title="AVG Basket" InitialSortDirection=SortDirection.Descending Sortable="true" />
 
 
         </FluentDataGrid>
@@ -76,23 +111,52 @@
     private HubConnection? hubConnection;
     private List<List<SalesLineRealTime>> messages = new();
     private List<List<SalesLineRealTime>> FilteredData = new();
-    private string SelectedStore { get; set; }
-    private IEnumerable<string> Stores = new List<string>();
+
+
     private decimal TotalAmount { get; set; }
+    private int TotalTransactions { get; set; }
+    private decimal AverageBasket { get; set; }
     private DateTime? LastUpdated { get; set; }
-    private IQueryable<SalesLineRealTime> SalesLinesQuery { get; set; } //= Enumerable.Empty<SalesLineRealTime>().AsQueryable();
+    private IQueryable<SalesLineRealTime> SalesLinesQuery { get; set; } 
     private string[] ChartLabels { get; set; }
     private decimal[] ChartValues { get; set; }
     private List<SalesLineRealTime> salesLine;
-    private string[] Columns { get; set; } = new string[] { "StoreCode", "NetAmountAcy" };
+    // private string[] Columns { get; set; } = new string[] { "StoreCode", "NetAmountAcy" };
+
+
+    private bool ShowFilters { get; set; }
+
+    private List<string> Stores = new List<string>();
+    private List<string> StoreSchemes = new List<string>();
+
+
+    private string SelectedScheme { get; set; }
+    private string SelectedStore { get; set; }
+
+
     private KpiCard KpiCardRef;
+    private KpiCard KpiTotalTransactionsRef;
+    private KpiCard KpiAverageBasketRef;
 
     protected override async Task OnInitializedAsync()
     {
 
-
-
         var salesLinesTemp = await _client.GetFromJsonAsync<List<SalesLineRealTime>>("api/rt/sales/agg/store");
+        salesLinesTemp = salesLinesTemp.Where(s => !String.IsNullOrEmpty(SelectedScheme) ? s.Scheme == SelectedScheme : true).ToList();
+
+
+        SalesLinesQuery = salesLinesTemp.AsQueryable();
+
+        FilteredData = new List<List<SalesLineRealTime>> { salesLinesTemp };
+
+
+        // store scheme has an empty and from salesline
+        StoreSchemes = salesLinesTemp.Select(s => s.Scheme).Distinct().ToList();
+        // add empty string to the start of StoreSchemes
+        StoreSchemes.Insert(0, String.Empty);
+
+
+
 
 
         hubConnection = new HubConnectionBuilder()
@@ -104,12 +168,21 @@
         hubConnection.On<List<SalesLineRealTime>>("ReceiveData", async (salesLine) =>
         {
 
+            Stores = salesLine.Select(s => s.StoreCode).Distinct().ToList();
+
+
+            // store scheme has an empty and from salesline
+            StoreSchemes = salesLine.Select(s => s.Scheme).Distinct().ToList();
+            // add empty string to the start of StoreSchemes
+            StoreSchemes.Insert(0, String.Empty);
+
+            salesLine.OrderBy(s => s.NetAmountAcy);
+
             if (salesLine.Count > 0)
             {
 
                 messages.Add(salesLine);
 
-                // await JSPrint(messages);
             }
             else
             {
@@ -120,22 +193,13 @@
             // get the last message from messages
             messages = messages.TakeLast(25).ToList();
 
-
-
-
-            Stores = salesLine.Select(s => s.StoreCode).Distinct().ToList();
-
-
-
-            if (!String.IsNullOrEmpty(SelectedStore))
-            {
-                FilteredData = messages.Where(s => s.Any(x => x.StoreCode == SelectedStore)).ToList();
-            }
-            else
-            {
-                FilteredData = messages;
-            }
-
+            // FilteredData = messages;
+            FilteredData = messages
+            .Select(innerList => innerList
+                .Where(sale => !String.IsNullOrEmpty(SelectedScheme) ? sale.Scheme == SelectedScheme : true)
+                .ToList())
+            .Where(innerList => innerList.Any())
+            .ToList();
 
             // get the last from messages
             SalesLinesQuery = messages.LastOrDefault().AsQueryable();
@@ -144,19 +208,12 @@
             await grid.RefreshDataAsync();
 
 
-            ChartLabels = FilteredData.Select(d => d.First().DateTime?.ToString("HH:mm:ss")).ToArray(); //yyyy-MM-dd HH:mm
-            ChartValues = FilteredData.Select(d => d.Sum(x => x.NetAmountAcy)).ToArray();
+            // ChartLabels = FilteredData.Select(d => d.First().DateTime?.ToString("HH:mm:ss")).ToArray(); //yyyy-MM-dd HH:mm
+            // ChartValues = FilteredData.Select(d => d.Sum(x => x.NetAmountAcy)).ToArray();
 
 
             await UpdateChartAsync();
             await InvokeAsync(StateHasChanged);
-
-
-
-
-
-
-
 
         });
 
@@ -165,6 +222,8 @@
         await hubConnection.StartAsync();
 
     }
+
+
 
     public bool IsConnected =>
         hubConnection?.State == HubConnectionState.Connected;
@@ -185,16 +244,61 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        ChartLabels = FilteredData.Select(d => d.First().DateTime?.ToString("HH:mm:ss")).ToArray(); //yyyy-MM-dd HH:mm
-        ChartValues = FilteredData.Select(d => d.Sum(x => x.NetAmountAcy)).ToArray();
+        // ChartLabels = FilteredData.Select(d => d.First().DateTime?.ToString("HH:mm:ss")).ToArray(); //yyyy-MM-dd HH:mm
+        // ChartValues = FilteredData.Select(d => d.Sum(x => x.NetAmountAcy)).ToArray();
 
         if (firstRender)
         {
             FilteredData = new List<List<SalesLineRealTime>>();
             // Initialize Chart.js once data is loaded
             await LoadChartAsync();
+
+            await UpdateKpiCardsAsync();
         }
     }
+
+
+    private void OpenFilterPanel()
+    {
+        // change the showFilters value
+        ShowFilters = !ShowFilters;
+
+    }
+
+    private async void FilterData()
+    {
+
+
+
+
+        Console.WriteLine($"TEST00001   {SelectedScheme}");
+
+
+
+        // Filter the Sales list in-place to include only "HAPPY" scheme
+        FilteredData = messages
+            .Select(innerList => innerList
+                .Where(sale => !String.IsNullOrEmpty(SelectedScheme) ? sale.Scheme == SelectedScheme : true)
+                .ToList())
+            .Where(innerList => innerList.Any()) 
+            .ToList();
+
+
+        SalesLinesQuery = FilteredData.LastOrDefault().AsQueryable();
+
+
+
+        await grid.RefreshDataAsync();
+        await _jsRuntime.InvokeVoidAsync("resetChart", "salesChart");
+        await LoadChartAsync();
+        await UpdateKpiCardsAsync();
+
+
+        // await InvokeAsync(StateHasChanged);
+    }
+
+
+    
 
 
     private async Task JSPrint(object obj)
@@ -264,6 +368,9 @@
         // Pass chartConfig to JavaScript to render the chart
         await _jsRuntime.InvokeVoidAsync("renderChart", "salesChart", chartConfig);
 
+
+        await UpdateKpiCardsAsync();
+
     }
 
     private async Task UpdateChartAsync()
@@ -271,19 +378,38 @@
         var labels = FilteredData.Select(d => d.First().DateTime?.ToString("HH:mm:ss")).ToArray(); // Adjust as necessary
         var values = FilteredData.Select(d => d.Sum(x => x.NetAmountAcy)).ToArray();
 
-        TotalAmount = FilteredData.Select(d => d.Sum(x => x.NetAmountAcy)).LastOrDefault();
-        LastUpdated = FilteredData.Select(d => d.First().DateTime).LastOrDefault();
-
         await _jsRuntime.InvokeVoidAsync("updateChart", "salesChart", labels, values);
 
 
-        // await _jsRuntime.InvokeVoidAsync("updateRealTimeSalesKPI", TotalAmount, LastUpdated);
+        await UpdateKpiCardsAsync();
+    }
+
+
+    private async Task UpdateKpiCardsAsync()
+    {
+
+        TotalAmount = FilteredData.Select(d => d.Sum(x => x.NetAmountAcy)).LastOrDefault();
+        TotalTransactions = FilteredData.Select(d => d.Sum(x => x.TotalTransactions)).LastOrDefault();
+        AverageBasket = TotalTransactions > 0 && TotalAmount > 0 ? TotalAmount / TotalTransactions : 0;
+        LastUpdated = FilteredData.Select(d => d.First().DateTime).LastOrDefault();
+
 
         if (KpiCardRef != null)
         {
             await KpiCardRef.UpdateKpiAsync(TotalAmount.ToString("$ ##,##"), LastUpdated.Value.ToString("yyyy-MM-dd hh:mm:ss"));
         }
+
+        if (KpiTotalTransactionsRef != null)
+        {
+            await KpiTotalTransactionsRef.UpdateKpiAsync(TotalTransactions.ToString("##,##"), LastUpdated.Value.ToString("yyyy-MM-dd hh:mm:ss"));
+        }
+
+        if (KpiAverageBasketRef != null)
+        {
+            await KpiAverageBasketRef.UpdateKpiAsync(AverageBasket.ToString("$ ##,##"), LastUpdated.Value.ToString("yyyy-MM-dd hh:mm:ss"));
+        }
     }
+
 
 
 }

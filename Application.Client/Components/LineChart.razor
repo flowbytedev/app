@@ -14,75 +14,75 @@
 
 @code {
     [Parameter] public string Title { get; set; }
-    [Parameter] public string[] Labels { get; set; }
-    [Parameter] public decimal[] Values { get; set; }
+    // [Parameter] public string[] Labels { get; set; }
+    // [Parameter] public decimal[] Values { get; set; }
 
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
+    // protected override async Task OnAfterRenderAsync(bool firstRender)
+    // {
+    //     if (firstRender)
+    //     {
 
-            // Initialize Chart.js once data is loaded
-            await LoadChartAsync();
-        }
-        else
-        {
-            await UpdateChartAsync();
-        }
-    }
+    //         // Initialize Chart.js once data is loaded
+    //         await LoadChartAsync();
+    //     }
+    //     else
+    //     {
+    //         await UpdateChartAsync();
+    //     }
+    // }
 
-    private async Task LoadChartAsync()
-    {
-        // var labels = Items.Select(d => d.First().DateTime?.ToString("HH:mm:ss")).ToArray(); //yyyy-MM-dd HH:mm
-        // var values = Items.Select(d => d.First().NetAmountAcy).ToArray();
+    // private async Task LoadChartAsync()
+    // {
+    //     // var labels = Items.Select(d => d.First().DateTime?.ToString("HH:mm:ss")).ToArray(); //yyyy-MM-dd HH:mm
+    //     // var values = Items.Select(d => d.First().NetAmountAcy).ToArray();
 
-        var chartConfig = new
-        {
-            type = "line",
-            data = new
-            {
-                Labels,
-                datasets = new[]
-                {
-                    new
-                    {
-                        label = "Total Sales",
-                        data = Values,
-                        fill = true,
-                        borderColor = "#059669",
-                        backgroundColor = "#ECFDF5",
-                        tension = 0.4,
-                        pointRadius = 4,
-                        pointBackgroundColor = "#059669",
-                        pointBorderColor = "#fff",
-                        pointBorderWidth = 2
-                    }
-                }
-            },
-            options = new
-            {
-                responsive = true,
-                maintainAspectRatio = false,
-                plugins = new
-                {
-                    legend = new
-                    {
-                        position = "top"
-                    }
-                }
-            },
-        };
+    //     var chartConfig = new
+    //     {
+    //         type = "line",
+    //         data = new
+    //         {
+    //             Labels,
+    //             datasets = new[]
+    //             {
+    //                 new
+    //                 {
+    //                     label = "Total Sales",
+    //                     data = Values,
+    //                     fill = true,
+    //                     borderColor = "#059669",
+    //                     backgroundColor = "#ECFDF5",
+    //                     tension = 0.4,
+    //                     pointRadius = 4,
+    //                     pointBackgroundColor = "#059669",
+    //                     pointBorderColor = "#fff",
+    //                     pointBorderWidth = 2
+    //                 }
+    //             }
+    //         },
+    //         options = new
+    //         {
+    //             responsive = true,
+    //             maintainAspectRatio = false,
+    //             plugins = new
+    //             {
+    //                 legend = new
+    //                 {
+    //                     position = "top"
+    //                 }
+    //             }
+    //         },
+    //     };
 
-        // Pass chartConfig to JavaScript to render the chart
-        await _jsRuntime.InvokeVoidAsync("renderChart", "salesChart", chartConfig);
+    //     // Pass chartConfig to JavaScript to render the chart
+    //     await _jsRuntime.InvokeVoidAsync("renderChart", "salesChart", chartConfig);
 
-    }
+    // }
 
 
 
-    private async Task UpdateChartAsync()
-    {
-        await _jsRuntime.InvokeVoidAsync("updateChart", "salesChart", Labels, Values);
-    }
+    // private async Task UpdateChartAsync()
+    // {
+    //     await _jsRuntime.InvokeVoidAsync("updateChart", "salesChart", Labels, Values);
+    // }
 }
