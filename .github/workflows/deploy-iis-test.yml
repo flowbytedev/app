@@ -1,0 +1,46 @@
+name: Deploy API to IIS - Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+    - uses: actions/checkout@v2
+
+    # removed the dotnet setup. because the self hosted agent already has the dotnet installed.
+    # - name: Setup .NET Core
+    #   uses: actions/setup-dotnet@v4
+    #   with:
+    #     dotnet-version: 9.x.x
+    
+
+    - name: Build with dotnet
+      shell: cmd
+      run: dotnet build Application/Application.csproj --configuration Release
+
+
+  # dependecy on the build job
+  deploy:
+    runs-on: self-hosted
+    needs: build
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Publish with dotnet
+      shell: cmd
+      run: dotnet publish Application/Application.csproj --configuration Release --output .\flowbyte-app #./publish
+
+    - name: Deploy to IIS
+      shell: cmd
+      run: |
+        iisreset /stop
+        xcopy /s /y  .\flowbyte-app\* C:\inetpub\wwwroot\Flowbyte_Test\
+        iisreset /start
+      
