@@ -55,8 +55,6 @@
         if(_stateContainer.Company == null && await _clientAuthenticationDetail.UserIsAuthenticated())
         {
             _stateContainer.Company = await GetUserDefaultCompany(userId);
-
-            // Console.WriteLine($"NAVMENU ONINITIALIZED: {_stateContainer.Company.Id}");
         }
         else
         {

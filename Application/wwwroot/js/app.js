@@ -5,6 +5,12 @@
 let charts = {};
 
 function renderChart(chartId, config) {
+
+    // if chart does not exist, continue
+    //if (!document.getElementById(chartId)) {
+    //    return;
+    //}
+
     if (charts[chartId]) {
         charts[chartId].destroy(); // Destroy existing chart instance
     }
@@ -13,7 +19,7 @@ function renderChart(chartId, config) {
 
 }
 
-function updateChart(chartId, newLabels, newData) {
+function updateChart(chartId, newLabels, newData, config=null) {
     const chart = charts[chartId];
     if (chart) {
         chart.data.labels = newLabels;
@@ -21,14 +27,20 @@ function updateChart(chartId, newLabels, newData) {
         chart.update(); // Update the chart with new data
 
     }
+
+    else {
+        renderChart(chartId, config);
+    }
 }
 
 
 // reset chart
-function resetChart(chartId) {
+function resetChart(chartId, config) {
     const chart = charts[chartId];
     if (chart) {
         chart.destroy();
+
+        renderChart(chartId, config);
     }
 }
 

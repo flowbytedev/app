@@ -9,11 +9,18 @@ namespace Application.Shared.Models;
 
 public class BaseModel
 {
-    public DateTime? CreatedOn { get; set; }
-    public DateTime? ModifiedOn { get; set; }
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public DateTime? CreatedOn { get; set; } = DateTime.Now;
+
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public DateTime? ModifiedOn { get; set; } = DateTime.Now;
+
+
     public string? CreatedBy { get; set; }
     public string? ModifiedBy { get; set; }
-    public bool? IsDeleted { get; set; }
+
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public bool? IsDeleted { get; set; } = false;
 
 
     [NotMapped]

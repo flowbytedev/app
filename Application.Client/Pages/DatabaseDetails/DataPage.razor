@@ -8,27 +8,12 @@
 @attribute [Authorize]
 
 
-@if(String.IsNullOrEmpty(SchemaName) && String.IsNullOrEmpty(TableName))
+@if(!String.IsNullOrEmpty(TableName))
 {
-
+    <Toolbar Title="@(TableName.Replace("[", "").Replace("]", ""))" HasFilter="true" OnFilterClick="@(OnShowFilterClick)" />
 }
-else
-{
-    <div style="padding:10px;min-width:800px">
-        <FluentToolbar id="toolbar-fluent-components-two" style="width:100%">
-
-            <h3 slot="label" style="margin-right:10px;">@TableName.Replace("[", "").Replace("]", "")</h3>
-
-            <FluentButton IconEnd="@(new Icons.Regular.Size16.Filter())"
-            Title="Filter"
-            Appearance="Appearance.Stealth"
-            OnClick="@(OnShowFilterClick)" />
 
 
-        </FluentToolbar>
-    </div>
-
-}
 
 
 
@@ -96,7 +81,7 @@ else
     </div>
 
 
-    <FluentGrid Spacing="1" Justify="JustifyContent.FlexEnd">
+    <FluentGrid Spacing="1" Justify="JustifyContent.FlexEnd" Style="background-color:white; border-radius:5px">
 
         <FluentGridItem>
             <FluentButton IconStart="@(new Icons.Regular.Size20.ChevronDoubleLeft())" OnClick="GoToFirstPage" Disabled="@(pagination.CurrentPageIndex == 0 ? true : false)" />
