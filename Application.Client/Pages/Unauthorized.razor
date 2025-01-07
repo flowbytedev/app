@@ -1,7 +1,7 @@
 ﻿@page "/unauthorized"
 @inject HttpClient _client
 @inject NavigationManager _navigationManager
-@inject IToastService _toastService
+@* @inject IToastService _toastService *@
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 
 
@@ -110,14 +110,14 @@
 
         _navigationManager.NavigateTo("/");
 
-        ShowToast();
+        // ShowToast();
     }
 
 
-    void ShowToast()
-    {
-        var message = "Your access request has been submitted successfully!\nYou will be notified by email.";
+    // void ShowToast()
+    // {
+    //     var message = "Your access request has been submitted successfully!\nYou will be notified by email.";
 
-        _toastService.ShowSuccess(message);
-    }
+    //     _toastService.ShowSuccess(message);
+    // }
 }
