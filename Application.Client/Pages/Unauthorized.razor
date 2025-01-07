@@ -1,5 +1,7 @@
 ﻿@page "/unauthorized"
 @inject HttpClient _client
+@inject NavigationManager _navigationManager
+@inject IToastService _toastService
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 
 
@@ -74,7 +76,6 @@
 
 
 
-
 @code {
 
 
@@ -99,17 +100,24 @@
     private async Task HandleValidSubmit()
     {
 
-        // print the user access request
-        Console.WriteLine(UserAccessRequest.Email);
-        Console.WriteLine(UserAccessRequest.FullName);
-        Console.WriteLine(UserAccessRequest.Department);
-        Console.WriteLine(UserAccessRequest.ManagerName);
-        Console.WriteLine(UserAccessRequest.Reason);
-
+        // remove companyId from the header
+        _client.DefaultRequestHeaders.Remove("X-Company-ID");
         //add X-Company-ID to the header
         _client.DefaultRequestHeaders.Add("X-Company-ID", companyId);
 
         UserAccessRequest.ApplicationPageId = page;
         await _client.PostAsJsonAsync("api/app/pages/access-requests", UserAccessRequest);
+
+        _navigationManager.NavigateTo("/");
+
+        ShowToast();
+    }
+
+
+    void ShowToast()
+    {
+        var message = "Your access request has been submitted successfully!\nYou will be notified by email.";
+
+        _toastService.ShowSuccess(message);
     }
 }
