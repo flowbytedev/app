@@ -5,6 +5,10 @@
     <div class="kpi-label">@Title</div>
     <div id="@($"rts-kpi-value-{Id}")" class="kpi-value">
         @* @Value *@
+        @if (!String.IsNullOrEmpty(Value))
+        {
+            <span>@Value</span>
+        }
     </div>
     <div class="kpi-trend">
 
@@ -28,6 +32,10 @@
 @code {
     [Parameter]
     public string Title { get; set; } = "Default Title";
+
+    [Parameter]
+    public string? Value { get; set; }
+
 
     // [Parameter]
     // public string Value { get; set; } = "0";

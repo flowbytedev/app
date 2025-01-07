@@ -20,6 +20,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Client;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 
 
@@ -32,10 +34,17 @@ builder.Services.AddControllers();
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddAuthenticationStateSerialization()
-    .AddInteractiveWebAssemblyComponents().AddInteractiveServerComponents();
+    .AddInteractiveWebAssemblyComponents()
+    .AddInteractiveServerComponents();
+
+
+
+
 builder.Services.AddFluentUIComponents();
 
 builder.Services.AddCascadingAuthenticationState();
+//builder.Services.AddAuthorizationCore();
+
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, PersistingServerAuthenticationStateProvider>();
@@ -58,28 +67,29 @@ builder.Services.AddAuthentication(options =>
     .AddOpenIdConnect(MS_OIDC_SCHEME, displayName: "Continue with Microsoft" , options =>
     {
 
-        //options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 
         options.SignInScheme = IdentityConstants.ExternalScheme;
         options.ClientId = builder.Configuration["AzureAd:ClientId"];
         options.ClientSecret = builder.Configuration["AzureAd:ClientSecret"];
         options.Authority = builder.Configuration["AzureAd:Authority"];
         options.MetadataAddress = builder.Configuration["AzureAd:MetadataAddress"];
-        //options.Instance = builder.Configuration["AzureAd:Instance"];
-        //options.Domain = builder.Configuration["AzureAd:Domain"];
-        //options.TenantId = builder.Configuration["AzureAd:TenantId"];
         options.CallbackPath = builder.Configuration["AzureAd:CallbackPath"];
         options.RequireHttpsMetadata = false;
-        options.SaveTokens = false;
+
+        options.SaveTokens = true;
+        options.GetClaimsFromUserInfoEndpoint = true;
+
         options.SignedOutRedirectUri = builder.Configuration["AzureAd:SignedOutRedirectUri"];
         options.SignedOutCallbackPath = builder.Configuration["AzureAd:SignedOutCallbackPath"];
         options.ResponseType = OpenIdConnectResponseType.Code;
 
-        options.Scope.Add(OpenIdConnectScope.OpenIdProfile);
-        options.Scope.Add(OpenIdConnectScope.OfflineAccess);
-        options.MapInboundClaims = false;
-        options.TokenValidationParameters.NameClaimType = "name";
-        options.TokenValidationParameters.RoleClaimType = "roles";
+
+        // .NET 9 feature
+        options.PushedAuthorizationBehavior = PushedAuthorizationBehavior.Disable;
+        options.TokenValidationParameters.NameClaimType = JwtRegisteredClaimNames.Name;
+        options.TokenValidationParameters.RoleClaimType = "role";
+
     });
 
 
@@ -95,6 +105,10 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
+    .AddRoles<IdentityRole>()
+    .AddRoleManager<RoleManager<IdentityRole>>()
+    .AddRoleStore<RoleStore<IdentityRole, ApplicationDbContext>>()
+    .AddUserStore<UserStore<ApplicationUser, IdentityRole, ApplicationDbContext>>()
     .AddDefaultTokenProviders();
 
 // Add services to the container.
@@ -112,9 +126,16 @@ builder.Services.AddScoped<IDataService, Application.Shared.Services.DataService
 builder.Services.AddScoped<IRealTimeDataService, RealTimeDataService>();
 
 
+
+
+
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.ClaimsIdentity.UserIdClaimType = ClaimTypes.NameIdentifier;
+    options.ClaimsIdentity.UserNameClaimType = ClaimTypes.Name;
+    options.ClaimsIdentity.RoleClaimType = ClaimTypes.Role;
+    //options.ClaimsIdentity.EmailClaimType = ClaimTypes.Email;
+    //options.User.RequireUniqueEmail = true;
 });
 
 // get the uri from the appsettings.json

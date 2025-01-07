@@ -1,4 +1,5 @@
 using Application.Shared.Models;
+using Application.Shared.Models.Admin;
 using Application.Shared.Models.Data;
 using Application.Shared.Models.RealTime;
 using Application.Shared.Models.User;
@@ -105,6 +106,12 @@ namespace Application.Data
                 }
             }
         }
+
+
+        public DbSet<ApplicationPage> ApplicationPage { get; set; }
+        public DbSet<ApplicationPageRole> ApplicationPageRole { get; set; }
+        public DbSet<UserAccessRequest> UserAccessRequest { get; set; }
+
 
 
         public DbSet<Company> Company { get; set; }
