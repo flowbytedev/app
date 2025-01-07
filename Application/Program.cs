@@ -43,7 +43,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddFluentUIComponents();
 
 builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddAuthorizationCore();
+//builder.Services.AddAuthorizationCore();
 
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
@@ -86,7 +86,7 @@ builder.Services.AddAuthentication(options =>
 
 
         // .NET 9 feature
-        options.PushedAuthorizationBehavior = PushedAuthorizationBehavior.Require;
+        options.PushedAuthorizationBehavior = PushedAuthorizationBehavior.Disable;
         options.TokenValidationParameters.NameClaimType = JwtRegisteredClaimNames.Name;
         options.TokenValidationParameters.RoleClaimType = "role";
 
