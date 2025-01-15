@@ -7,6 +7,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using System.Net.Http.Json;
+using Parquet.Schema;
+using Parquet;
+using Parquet.Data;
+using System.IO;
+using Azure.Storage.Blobs;
 
 namespace Application.Shared.Services;
 
@@ -27,7 +32,7 @@ public class DataService : IDataService
     {
         var dataTable = ParseCsvToDataTable(content);
         var tableName = GenerateTableName(fileName);
-        string[] columns = dataTable.Columns.Cast<DataColumn>().Select(col => col.ColumnName).ToArray();
+        string[] columns = dataTable.Columns.Cast<System.Data.DataColumn>().Select(col => col.ColumnName).ToArray();
 
         // first get the columns that are duplicated
         var duplicateColumns = columns.GroupBy(x => x)
@@ -53,7 +58,7 @@ public class DataService : IDataService
         foreach (DataRow row in dataTable.Rows)
         {
             var dict = new Dictionary<string, object>();
-            foreach (DataColumn col in dataTable.Columns)
+            foreach (System.Data.DataColumn col in dataTable.Columns)
             {
                 dict[col.ColumnName] = row[col];
             }
@@ -62,16 +67,18 @@ public class DataService : IDataService
 
 
         var tableCreateRequest = await _client.PostAsJsonAsync($"api/userData/tables/create/{tableName}", columns);
-        Console.WriteLine("---------------- Table Created ----------------");
 
         var tableInsertRequest = await _client.PostAsJsonAsync($"api/userData/tables/insert/{tableName}", data);
-        Console.WriteLine("---------------- Data Inserted ----------------");
 
 
         // Optionally, store metadata about the table
         //await _client.PostAsJsonAsync($"api/userData/tables/metadata/{tableName}", dataTable);
         //await StoreMetadataAsync(tableName, fileName);
     }
+
+
+
+    
 
 
 
@@ -105,6 +112,16 @@ public class DataService : IDataService
 
         return dataTable;
     }
+
+
+
+
+
+    
+
+
+
+
 
     private string GenerateTableName(string fileName)
     {

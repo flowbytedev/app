@@ -47,6 +47,24 @@ namespace Application.Services
             return await _context.ApplicationUser.FindAsync(id);
         }
 
+        public async Task<ApplicationUser> GetUserByEmail(string email)
+        {
+            return await _userManager.FindByEmailAsync(email);
+        }
+
+        public async Task<List<string>> GetUseremails(string companyId)
+        {
+            var members = await _context.CompanyMember.Where(m => m.CompanyId == companyId).ToListAsync();
+
+            var userIds = members.Select(m => m.ApplicationUserId).ToArray();
+
+            var users = await _context.ApplicationUser.Where(u => userIds.Contains(u.Id)).ToListAsync();
+
+            return users.Select(u => u.Email).ToList();
+        }
+
+
+
         private IEnumerable<IdentityError>? identityErrors;
 
         public async Task<ApplicationUser> RegisterUser(UserInputModel userInput, string companyId)

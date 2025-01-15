@@ -1,5 +1,6 @@
 ﻿@inherits LayoutComponentBase
 @using System.Security.Claims
+@using Microsoft.AspNetCore.WebUtilities
 @inject NavigationManager _navigationManager
 @inject AuthenticationStateProvider _authenticationStateProvider
 @inject StateContainer _stateContainer
@@ -36,15 +37,15 @@
     <FluentFooter>
         <div>< /> with 💙 by flowbyte</div>
         <FluentSpacer />
-        @* <a href="https://learn.microsoft.com/en-us/aspnet/core/blazor" target="_blank">About Blazor</a> *@
     </FluentFooter>
 </FluentLayout>
 
 
 
 <FluentMenuProvider />
-@* <FluentToastProvider MaxToastCount="10" @rendermode="@RenderMode.InteractiveWebAssembly" />
-<FluentMessageBarProvider /> *@
+<FluentToastProvider MaxToastCount="10" @rendermode="@RenderMode.InteractiveWebAssembly" />
+<FluentMessageBarProvider />
+<FluentDialogProvider @rendermode="@RenderMode.InteractiveWebAssembly" />
 
 
 <div id="blazor-error-ui">
@@ -102,6 +103,27 @@
         }
 
         var stateCompany = _stateContainer.Company;
+
+        // add ?c=comp in the url
+        var uri = new Uri(_navigationManager.Uri);
+        var query = uri.Query;
+        
+        // check if url contains ?c=x
+        if (QueryHelpers.ParseQuery(query).TryGetValue("c", out var companyId))
+        {
+            var company = await _companyService.GetCompany(companyId);
+            _stateContainer.Company = company;
+        }
+        else
+        {
+            var company = await GetUserDefaultCompany(userId);
+            _stateContainer.Company = company;
+
+            // add ?c=x to the url
+            var newUri = QueryHelpers.AddQueryString(uri.AbsoluteUri, "c", company.Id);
+
+            _navigationManager.NavigateTo(newUri);
+        }
 
         if(stateCompany is null)
         {

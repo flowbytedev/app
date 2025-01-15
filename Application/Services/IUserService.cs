@@ -9,11 +9,15 @@ namespace Application.Services
 
         Task<ApplicationUser> GetUser(string id);
 
+        Task<ApplicationUser> GetUserByEmail(string email);
+
         Task<ApplicationUser> UpdateUserAsync(ApplicationUser user);
 
         Task<ApplicationUser> DeleteUserAsync(string id);
 
         Task<ApplicationUser> RegisterUser(UserInputModel userInput, string companyId);
+
+        Task<List<string>> GetUseremails(string companyId);
 
     }
 }

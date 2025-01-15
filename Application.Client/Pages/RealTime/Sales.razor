@@ -253,7 +253,6 @@
 
         bool hasMatchingRole = PageRoles.Intersect(UserRoles).Any();
 
-        await JSPrint(hasMatchingRole);
 
         // if(!UserRoles.Contains($"{companyId}_Sales"))
         if (!UserRoles.Any(r => PageRoles.Contains(r)))
