@@ -56,7 +56,7 @@ jobs:
       shell: cmd
       run: |
         iisreset /stop
-        xcopy /s /y  .\flowbyte-app\* "C:\inetpub\wwwroot\'$Env:APP_IIS'"\
+        robocopy .\flowbyte-app "C:\inetpub\wwwroot\'$Env:APP_IIS'" /E /NFL /NDL /NP /R:3 /W:5
         iisreset /start
       env:
         APP_IIS: ${{ secrets.APP_IIS }}
