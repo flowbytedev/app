@@ -39,11 +39,12 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Debug the path
-      shell: cmd
-      run: echo "Path - C:\inetpub\wwwroot\$Env:APP_IIS"
+    - name: Debug secrets
+      shell: powershell
       env:
         APP_IIS: ${{ secrets.APP_IIS }}
+      run: |
+        Write-Host "The APP_IIS variable is: '$Env:APP_IIS'"
 
 
 
@@ -55,7 +56,7 @@ jobs:
       shell: cmd
       run: |
         iisreset /stop
-        xcopy /s /y  .\flowbyte-app\* "C:\inetpub\wwwroot\$Env:APP_IIS"\
+        xcopy /s /y  .\flowbyte-app\* "C:\inetpub\wwwroot\'$Env:APP_IIS'"\
         iisreset /start
       env:
         APP_IIS: ${{ secrets.APP_IIS }}
