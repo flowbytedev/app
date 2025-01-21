@@ -1,9 +1,10 @@
-name: Deploy API to IIS
+name: Deploy API to IIS - PROD
 
 on:
   workflow_dispatch:
   push:
-    branches:  [ dev, main ]
+    branches:
+        - main
     paths:
       - 'Application/**'
       - 'Application.Client/**'
@@ -12,9 +13,6 @@ on:
 jobs:
   build:
     runs-on: self-hosted
-
-    # Dynamically pick environment: if branch is 'dev', use 'test'; else use 'prod'
-    environment: ${{ github.ref_name == 'dev' && 'test' || 'prod' }}
 
     steps:
     - uses: actions/checkout@v2
@@ -38,15 +36,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-
-    - name: Debug secrets
-      shell: powershell
-      env:
-        APP_IIS: ${{ secrets.APP_IIS }}
-      run: |
-        Write-Host "The APP_IIS variable is: '$Env:APP_IIS'"
-
-
+  
 
     - name: Publish with dotnet
       shell: cmd
@@ -58,7 +48,7 @@ jobs:
         APP_IIS: ${{ secrets.APP_IIS }}
       run: |
         iisreset /stop
-        robocopy .\flowbyte-app "C:\inetpub\wwwroot\$Env:APP_IIS" /E /NFL /NDL /NP /R:3 /W:5
+        xcopy /s /y  .\flowbyte-app\* C:\inetpub\wwwroot\Flowbyte\
         iisreset /start
       
 
