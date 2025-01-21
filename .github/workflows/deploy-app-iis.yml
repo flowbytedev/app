@@ -41,7 +41,10 @@ jobs:
 
     - name: Debug the path
       shell: cmd
-      run: echo C:\inetpub\wwwroot\${{ secrets.APP_IIS }}\
+      run: echo "Path - C:\inetpub\wwwroot\$Env:APP_IIS"
+      env:
+        APP_IIS: ${{ secrets.APP_IIS }}
+
 
 
     - name: Publish with dotnet
@@ -52,6 +55,9 @@ jobs:
       shell: cmd
       run: |
         iisreset /stop
-        xcopy /s /y  .\flowbyte-app\* C:\inetpub\wwwroot\${{ secrets.APP_IIS }}\
+        xcopy /s /y  .\flowbyte-app\* "C:\inetpub\wwwroot\$Env:APP_IIS"\
         iisreset /start
+      env:
+        APP_IIS: ${{ secrets.APP_IIS }}
+
       
