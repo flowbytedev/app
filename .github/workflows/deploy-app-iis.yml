@@ -39,6 +39,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Debug the path
+      shell: cmd
+      run: echo C:\inetpub\wwwroot\${{ secrets.APP_IIS }}\
+
+
     - name: Publish with dotnet
       shell: cmd
       run: dotnet publish Application/Application.csproj --configuration Release --output .\flowbyte-app #./publish
