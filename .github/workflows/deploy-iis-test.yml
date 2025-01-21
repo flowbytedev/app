@@ -5,6 +5,10 @@ on:
   push:
     branches:
       - dev
+    paths:
+      - 'Application/**'
+      - 'Application.Client/**'
+      - 'Application.Shared/**'
 
 jobs:
   build:
