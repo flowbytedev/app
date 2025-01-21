@@ -131,6 +131,10 @@ namespace Application.Data
         public DbSet<Column> Column { get; set; }
 
         public DbSet<SalesLineRealTime> SalesLineRealTime { get; set; }
+
+        public DbSet<DataFile> DataFile { get; set; }
+        
+        public DbSet<DataFileAccess> DataFileAccess { get; set; }
         
 
 

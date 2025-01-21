@@ -79,7 +79,7 @@ public class DatabaseService
                     {
                         while (await reader.ReadAsync())
                         {
-                            tables.Add(new Table
+                            tables.Add(new Table()
                             {
                                 Schema = reader["TABLE_SCHEMA"].ToString(),
                                 Name = reader["TABLE_NAME"].ToString()

@@ -1,56 +1,93 @@
-﻿@page "/upload"
-@inject IDataService DataService
-@rendermode InteractiveWebAssembly
-@inject ILogger<UploadPage> Logger
+﻿@page "/data/upload"
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@inject NavigationManager _navigationManager
+@inject HttpClient _client
 @attribute [Authorize]
 
 
+<div class="container">
+<FluentGrid Spacing="1" AdaptiveRendering="true" Style="margin-top:25px;">
+
+    <FluentGridItem xs="12" sm="3" Style="height: 85vh; padding:10px; background-color:white">
+        <h1>Upload</h1>
+        <p>Please fill out this form to before uploading.</p>
+
+            <EditForm Model="@DataFile" OnValidSubmit="@HandleValidSubmit">
+            <DataAnnotationsValidator />
+            <FluentValidationSummary />
+
+            <div class="form-group">
+                <label for="name">File Name</label>
+                    <FluentTextField Name="file name" id="name" @bind-Value="@DataFile.FileName" oninput="this.value = this.value.replace(/\s/g, '')" Required Style="width:100%" />
+                    <FluentValidationMessage For="@(() => DataFile.FileName)" />
+            </div>
+
+            <div class="form-group">
+                <label for="name">Description</label>
+                    <FluentTextArea Name="description" id="name" @bind-Value="@DataFile.Description" Required Style="width:100%" />
+                    <FluentValidationMessage For="@(() => DataFile.Description)" />
+            </div>
+
+            <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" style="width=100%;">Save</FluentButton>
+        </EditForm>
+    </FluentGridItem>
 
 
-<FluentInputFile Id="my-file-uploader"
-                 Mode="InputFileMode.SaveToTemporaryFolder"
-                 Multiple="true"
-                 MaximumFileCount="4"
-                 MaximumFileSize="@(10*1024*1024)"
-                 Accept=".csv"
-                 @bind-ProgressPercent="@ProgressPercent"
-                 OnInputFileChange="LoadFiles"
-                 Style="height: 300px; border: 1px dashed var(--accent-fill-rest);">
-    <ChildContent>
-        <label for="my-file-uploader">
-            <FluentIcon Value="@(new @Icons.Regular.Size24.ArrowUpload())" />
-        </label>
+        <FluentGridItem xs="12" sm="9" Class="content-section" Style="@($"height:85vh; padding:10px; background-color:white; {DisplayUploadSection}")">
+        <FluentInputFile Id="my-file-uploader"
+                         Mode="InputFileMode.SaveToTemporaryFolder"
+                         Multiple="true"
+                         MaximumFileCount="4"
+                         MaximumFileSize="@(10*1024*1024)"
+                         Accept=".csv"
+                         @bind-ProgressPercent="@ProgressPercent"
+                         OnInputFileChange="LoadFiles"
+                         Style="height: 300px; border: 1px dashed var(--accent-fill-rest);">
+            <ChildContent>
+                <label for="my-file-uploader">
+                    <FluentIcon Value="@(new @Icons.Regular.Size24.ArrowUpload())" />
+                </label>
 
-        <div>
-            Drag files here you wish to upload,
-            or <label for="my-file-uploader">browse</label>
-            for them<span style="color: red;">*</span>.
-            <br />
-            <em>Maximum of 4 files allowed.</em>
-        </div>
+                <div>
+                    Drag files here you wish to upload,
+                    or <label for="my-file-uploader">browse</label>
+                    for them<span style="color: red;">*</span>.
+                    <br />
+                    <em>Maximum of 4 files allowed.</em>
+                </div>
 
-        <div>
-            <br />
-            <a href="#">Read more about our supported file formats.</a>
-        </div>
-    </ChildContent>
-</FluentInputFile>
+                <div>
+                    <br />
+                    <a href="#">Read more about our supported file formats.</a>
+                </div>
+            </ChildContent>
+        </FluentInputFile>
 
-@if (loadedFiles.Any())
-{
-    <h4>File(s) uploaded:</h4>
-    <ul>
-        @foreach (var file in loadedFiles)
-        {
-            <li>
-                <b>@file.Name</b> 🔹
-                @($"{Decimal.Divide(file.Size, 1024):N} KB") 🔹
-                @file.ContentType 🔹
-                @file.Name
-            </li>
-        }
-    </ul>
-}
+            @if (loadedFiles.Any())
+            {
+                <h4>File(s) uploaded:</h4>
+                <ul>
+                    @foreach (var file in loadedFiles)
+                    {
+                        <li>
+                            <b>@file.Name</b> 🔹
+                            @($"{Decimal.Divide(file.Size, 1024):N} KB") 🔹
+                            @file.ContentType 🔹
+                            @file.Name
+                        </li>
+                    }
+                </ul>
+            }
+
+        </FluentGridItem>
+
+
+
+    </FluentGrid>
+
+</div>
+
+
 
 
 
@@ -58,14 +95,17 @@
 
 @code {
 
+    private DataFile DataFile { get; set; } = new DataFile();
+
     private List<IBrowserFile> loadedFiles = new();
-    private int maxAllowedFiles = 3;
+    private int maxAllowedFiles = 1;
     private bool isLoading;
     private long maxFileSize = 1024 * 15;
     int ProgressPercent = 0;
     FluentInputFileEventArgs[] Files = Array.Empty<FluentInputFileEventArgs>();
 
 
+    public string DisplayUploadSection => String.IsNullOrEmpty(DataFile.FileName) ? "display:none" : "";
 
 
     private async Task LoadFiles(InputFileChangeEventArgs e)
@@ -73,33 +113,40 @@
         isLoading = true;
         loadedFiles.Clear();
 
-
+        ProgressPercent += 20;
 
         foreach (var file in e.GetMultipleFiles(maxAllowedFiles))
         {
-            ProgressPercent += 80 / e.FileCount;
+            ProgressPercent += 40 / e.FileCount;
             try
             {
                 loadedFiles.Add(file);
             }
             catch (Exception ex)
             {
-                Logger.LogError("File: {FileName} Error: {Error}",
+                Console.WriteLine("File: {FileName} Error: {Error}",
                     file.Name, ex.Message);
             }
         }
 
+        ProgressPercent += 20;
+
         await UploadData();
 
         ProgressPercent = 100;
-        await Task.Delay(1000);
+
+        await Task.Delay(500);
+        
         ProgressPercent = 0;
 
         isLoading = false;
     }
 
 
-
+    private void HandleValidSubmit()
+    {
+        Console.WriteLine("Handle Valid Submit");
+    }
 
 
 
@@ -112,11 +159,19 @@
         {
 
             using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // 10 MB limit
+
             using var reader = new StreamReader(stream);
+
             var content = await reader.ReadToEndAsync();
 
-            Console.WriteLine(content);
-            await DataService.ProcessAndStoreFileAsync(file.Name, content);
+            DataFile.Content = content;
+
+            await _client.PostAsJsonAsync("api/userData", DataFile);
+
+            DataFile = new DataFile();
+
+            _navigationManager.NavigateTo("data/upload");
+
         }
     }
 }

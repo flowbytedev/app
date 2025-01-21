@@ -15,5 +15,5 @@ internal class UserAccess
     
     public string Tables { get; set; }
 
-    public Column Columns { get; set; }
+    //public Column Columns { get; set; }
 }

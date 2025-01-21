@@ -22,6 +22,9 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Application.Shared.Models.Data;
+using Application.Shared.Models;
+using Application.Helpers;
 
 
 
@@ -122,11 +125,21 @@ builder.Services.AddScoped<ClientAuthenticationDetail>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<DatabaseService>();
-builder.Services.AddScoped<IDataService, Application.Shared.Services.DataService>();
+builder.Services.AddScoped<IDataService, DataService>();
+builder.Services.AddScoped<IAzureBlobService, AzureBlobService>();
 builder.Services.AddScoped<IRealTimeDataService, RealTimeDataService>();
+builder.Services.AddScoped<IUserDataService, UserDataService>();
+
+builder.Services.AddScoped<QueryService<DataFile>>();
 
 
 
+
+// Add EmailSettings configuration
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+
+// Register EmailHelper as a singleton
+builder.Services.AddSingleton<EmailHelper>();
 
 
 builder.Services.Configure<IdentityOptions>(options =>
@@ -136,6 +149,7 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.ClaimsIdentity.RoleClaimType = ClaimTypes.Role;
     //options.ClaimsIdentity.EmailClaimType = ClaimTypes.Email;
     //options.User.RequireUniqueEmail = true;
+
 });
 
 // get the uri from the appsettings.json
@@ -182,7 +196,7 @@ app.UseResponseCompression();
 
 app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
-    //.AddInteractiveServerRenderMode()
+    .AddInteractiveServerRenderMode()
     .AddAdditionalAssemblies(typeof(Application.Client._Imports).Assembly);
 
 // Add additional endpoints required by the Identity /Account Razor components.

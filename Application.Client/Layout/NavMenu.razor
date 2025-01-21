@@ -19,9 +19,7 @@
         <FluentNavMenu Id="main-menu" Width="250" Collapsible="true" Title="Navigation menu" @bind-Expanded="expanded" CustomToggle="true">
             <FluentNavLink Href="/" Match="NavLinkMatch.All" Icon="@(new Icons.Regular.Size20.Home())" IconColor="Color.Accent">Home</FluentNavLink>
             <FluentNavLink Href="rt/sales" Icon="@(new Icons.Regular.Size20.GanttChart())" IconColor="Color.Accent">Real Time Sales</FluentNavLink>
-            @* <FluentNavLink Href="tables" Icon="@(new Icons.Regular.Size20.Person())" IconColor="Color.Accent">Tables</FluentNavLink> *@
-            @* <FluentNavLink Href="admin/users" Icon="@(new Icons.Regular.Size20.Person())" IconColor="Color.Accent">Users</FluentNavLink> *@
-            @* <FluentNavLink Href="auth" Icon="@(new Icons.Regular.Size20.LockClosedKey())" IconColor="Color.Accent">Auth Required</FluentNavLink> *@
+            <FluentNavLink Href="data" Icon="@(new Icons.Regular.Size20.DataArea())" IconColor="Color.Accent">Data</FluentNavLink>
             <AuthorizeView>
                 <Authorized>
                     <FluentNavLink Href="Account/Manage">@context.User.Identity?.Name</FluentNavLink>

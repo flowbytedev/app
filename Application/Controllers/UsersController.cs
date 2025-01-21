@@ -24,24 +24,18 @@ namespace Application.Controllers
         private readonly IUserService _userService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        //private readonly IUserStore<ApplicationUser> _userStore;
-        //private readonly IUserRoleStore<ApplicationUser> _userRoleStore;
 
 
         public UsersController(ApplicationDbContext context, 
                                 IUserService userService, 
                                 UserManager<ApplicationUser> userManager,
-                                RoleManager<IdentityRole> roleManager//,
-                                //IUserStore<ApplicationUser> userStore,
-                                //IUserRoleStore<ApplicationUser> userRoleStore
+                                RoleManager<IdentityRole> roleManager
                                 )
         {
             _context = context;
             _userService = userService;
             _userManager = userManager;
             _roleManager = roleManager;
-            //_userStore = userStore;
-            //_userRoleStore = userRoleStore;
         }
 
         // GET: api/ApplicationUsers
@@ -97,6 +91,23 @@ namespace Application.Controllers
             var applicationUsers = await _userService.GetUser(id);
 
             return Ok(applicationUsers);
+        }
+
+
+        // GET: api/ApplicationUsers
+        [HttpGet("emails")]
+        public async Task<ActionResult<List<string>>> GetUserEmails()
+        {
+            // get userId from header
+            var userId = Request.Headers["UserId"];
+
+            // get company from header
+            var companyId = Request.Headers["X-Company-ID"];
+
+
+            var emails = await _userService.GetUseremails(companyId);
+
+            return Ok(emails);
         }
 
 

@@ -1,10 +1,13 @@
-name: Deploy API to IIS - Test
+name: Deploy API to IIS
 
 on:
   workflow_dispatch:
   push:
-    branches:
-      - dev
+    branches:  [ dev, main ]
+    paths:
+      - 'Application/**'
+      - 'Application.Client/**'
+      - 'Application.Shared/**'
 
 jobs:
   build:
@@ -41,6 +44,6 @@ jobs:
       shell: cmd
       run: |
         iisreset /stop
-        xcopy /s /y  .\flowbyte-app\* C:\inetpub\wwwroot\Flowbyte_Test\
+        xcopy /s /y  .\flowbyte-app\* C:\inetpub\wwwroot\${{ secrets.APP_IIS }}\
         iisreset /start
       
