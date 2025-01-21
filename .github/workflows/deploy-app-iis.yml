@@ -13,6 +13,9 @@ jobs:
   build:
     runs-on: self-hosted
 
+    # Dynamically pick environment: if branch is 'dev', use 'test'; else use 'prod'
+    environment: ${{ github.ref_name == 'dev' && 'test' || 'prod' }}
+
     steps:
     - uses: actions/checkout@v2
 
@@ -35,6 +38,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+
+    - name: Debug the path
+      shell: cmd
+      run: echo C:\inetpub\wwwroot\${{ secrets.APP_IIS }}\
+
 
     - name: Publish with dotnet
       shell: cmd
