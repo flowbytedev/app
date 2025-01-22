@@ -216,5 +216,7 @@
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
     <Build Include="dbo\Tables\item.sql" />
+    <Build Include="dbo\Tables\variant_option.sql" />
+    <Build Include="dbo\Tables\variant_option_value.sql" />
   </ItemGroup>
 </Project>
