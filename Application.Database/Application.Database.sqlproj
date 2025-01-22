@@ -215,5 +215,6 @@
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
+    <Build Include="dbo\Tables\item.sql" />
   </ItemGroup>
 </Project>
