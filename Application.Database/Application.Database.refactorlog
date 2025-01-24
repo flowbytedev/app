@@ -91,4 +91,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="sales_price_id" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="2b803bfb-48db-41e2-9e73-9482b05ac829" ChangeDateTime="01/24/2025 09:32:45">
+    <Property Name="ElementName" Value="[dbo].[sales_forecast_by_scheme_components].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[sales_forecast_by_scheme_components]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="date" />
+  </Operation>
 </Operations>
