@@ -15,10 +15,6 @@ public class UserAccessRequest : BaseModel
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int? Id { get; set; }
 
-    public string? CompanyId { get; set; }
-
-    public Company? Company { get; set; }
-
     public string? ApplicationUserId { get; set; }
 
     public ApplicationUser? ApplicationUser { get; set; }
