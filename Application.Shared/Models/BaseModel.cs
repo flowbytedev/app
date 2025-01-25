@@ -9,6 +9,9 @@ namespace Application.Shared.Models;
 
 public class BaseModel
 {
+    public string CompanyId { get; set; }
+    public Company Company { get; set; }
+
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public DateTime? CreatedOn { get; set; } = DateTime.Now;
 
