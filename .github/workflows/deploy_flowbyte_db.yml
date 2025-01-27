@@ -1,0 +1,54 @@
+name: Deploy DACPAC
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ dev, main ]
+    # Only trigger the workflow if changes occur in the 'Application.Database' folder (including all subfolders and files)
+    paths:
+      - 'Application.Database/**'
+      
+  
+
+jobs:
+  build-and-deploy-db:
+    # Run on your self-hosted Windows runner in Azure VM
+    runs-on: gmrldw
+    # If your self-hosted runner has specific labels, do something like:
+    # runs-on: [self-hosted, windows, azure-vm]
+
+    # Dynamically pick environment: if branch is 'dev', use 'test'; else use 'prod'
+    environment: ${{ github.ref_name == 'dev' && 'test' || 'prod' }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      # 1. BUILD THE DACPAC (if your .sqlproj is in the repo)
+      - name: Build the DACPAC project (cmd shell)
+        shell: cmd
+        run: |
+          "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\MSBuild.exe" Application.Database/Application.Database.sqlproj /t:Build /p:Configuration=Release
+
+
+      # 2. DEPLOY/PUBLISH THE DACPAC
+      - name: Publish DACPAC to SQL Database
+        run: |
+          # Example using sqlpackage to publish the DACPAC
+          # Adjust the SourceFile path if your build output folder is different
+          sqlpackage /Action:Publish `
+            /SourceFile:"Application.Database\bin\Release\Application.Database.dacpac" `
+            /TargetServerName:"$Env:DB_SERVER" `
+            /TargetDatabaseName:"$Env:DB_NAME" `
+            /TargetUser:"$Env:DB_USER" `
+            /TargetPassword:"$Env:DB_PASS" `
+            /TargetTrustServerCertificate:True `
+            /TargetEncryptConnection:True `
+            /p:BlockOnPossibleDataLoss=false `
+            /p:DropObjectsNotInSource=false
+        shell: powershell
+        env:
+          DB_SERVER: ${{ secrets.FLOWBYTE_DB_SERVER }}
+          DB_NAME: ${{ secrets.FLOWBYTE_DB }}
+          DB_USER: ${{ secrets.FLOWBYTE_DB_USER }}
+          DB_PASS: ${{ secrets.FLOWBYTE_DB_PASSWORD }}
