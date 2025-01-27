@@ -6,3 +6,4 @@
     CONSTRAINT [PK_customer_status] PRIMARY KEY ([code]),
     
 )
+ON [FLOWBYTE_DIM];

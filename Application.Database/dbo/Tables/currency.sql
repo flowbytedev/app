@@ -6,3 +6,4 @@
     CONSTRAINT [PK_currency] PRIMARY KEY ([code]), 
     
 )
+ON [FLOWBYTE_DIM];

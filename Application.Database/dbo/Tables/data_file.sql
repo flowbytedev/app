@@ -5,5 +5,6 @@
     [description] NVARCHAR (MAX) NULL,
     [tags]        NVARCHAR (MAX) NULL,
     CONSTRAINT [PK_data_file] PRIMARY KEY CLUSTERED ([id] ASC)
-);
+)
+ON [FLOWBYTE_DIM];
 

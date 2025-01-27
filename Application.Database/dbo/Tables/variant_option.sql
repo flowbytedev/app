@@ -7,6 +7,8 @@
     CONSTRAINT [FK_variant_option_company] FOREIGN KEY ([company_id]) REFERENCES [company]([id]), 
     CONSTRAINT [FK_variant_option_item] FOREIGN KEY ([company_id],[item_no]) REFERENCES [item]([company_id],[item_no]),
 )
+ON [FLOWBYTE_DIM];
 GO
 
 CREATE CLUSTERED INDEX [IX_variant_option_company_id_item] ON [dbo].[variant_option] ([company_id],[item_no])
+ON [FLOWBYTE_DIM];

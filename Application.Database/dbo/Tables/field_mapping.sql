@@ -11,5 +11,6 @@
     [filter_query]          NVARCHAR (MAX) NULL,
     [default_value]         NVARCHAR (MAX) NULL,
     CONSTRAINT [PK_field_mapping] PRIMARY KEY CLUSTERED ([source_table] ASC, [source_column] ASC, [destination_table] ASC, [destination_column] ASC)
-);
+)
+ON [FLOWBYTE_DIM];
 

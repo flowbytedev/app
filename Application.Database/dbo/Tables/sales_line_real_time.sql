@@ -6,5 +6,6 @@
     [scheme]             NVARCHAR (MAX)   NULL,
     [total_transactions] INT              DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_sales_line_real_time] PRIMARY KEY CLUSTERED ([date_time] ASC, [company_id] ASC, [store_code] ASC)
-);
+)
+ON [FLOWBYTE_RT];
 
