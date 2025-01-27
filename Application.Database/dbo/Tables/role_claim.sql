@@ -5,10 +5,12 @@
     [claim_value] NVARCHAR (MAX) NULL,
     CONSTRAINT [PK_role_claim] PRIMARY KEY CLUSTERED ([id] ASC),
     CONSTRAINT [FK_role_claim_role_role_id] FOREIGN KEY ([role_id]) REFERENCES [dbo].[role] ([id])
-);
+)
+ON [FLOWBYTE_DIM];
 
 
 GO
 CREATE NONCLUSTERED INDEX [IX_role_claim_role_id]
-    ON [dbo].[role_claim]([role_id] ASC);
+    ON [dbo].[role_claim]([role_id] ASC)
+    ON [FLOWBYTE_DIM];
 

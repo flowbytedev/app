@@ -12,5 +12,6 @@
     [is_deleted]  BIT            NULL,
     CONSTRAINT [PK_sales_channel] PRIMARY KEY CLUSTERED ([company_id] ASC, [code] ASC),
     CONSTRAINT [FK_sales_channel_company_company_id] FOREIGN KEY ([company_id]) REFERENCES [dbo].[company] ([id])
-);
+)
+ON [FLOWBYTE_DIM];
 

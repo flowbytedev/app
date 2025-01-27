@@ -8,10 +8,12 @@
     [modified_by] NVARCHAR (MAX) NULL,
     [is_deleted]  BIT            NULL,
     CONSTRAINT [PK_column] PRIMARY KEY CLUSTERED ([id] ASC)
-);
+)
+ON [FLOWBYTE_DIM];
 
 
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [IX_column_table_id_name]
-    ON [dbo].[column]([table_id] ASC, [name] ASC);
+    ON [dbo].[column]([table_id] ASC, [name] ASC)
+    ON [FLOWBYTE_DIM];
 

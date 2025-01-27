@@ -13,11 +13,14 @@
     CONSTRAINT [PK_warehouse] PRIMARY KEY ([company_id], [code]), 
     CONSTRAINT [FK_warehouse_company_id] FOREIGN KEY ([company_id]) REFERENCES [company]([id]) 
 )
+ON [FLOWBYTE_DIM];
 
 GO
 
 CREATE INDEX [IX_warehouse_name] ON [dbo].[warehouse] ([name])
+ON [FLOWBYTE_DIM];
 
 GO
 
 CREATE INDEX [IX_warehouse_city] ON [dbo].[warehouse] ([city])
+ON [FLOWBYTE_DIM];

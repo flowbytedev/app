@@ -8,7 +8,9 @@
     CONSTRAINT [FK_item_attribute_company] FOREIGN KEY ([company_id]) REFERENCES [company]([id]), 
     CONSTRAINT [FK_item_attribute_item] FOREIGN KEY ([company_id],[item_no]) REFERENCES [item]([company_id], [item_no]) 
 )
+ON [FLOWBYTE_DIM];
 
 GO
 
 CREATE INDEX [IX_item_attribute_attribute] ON [dbo].[item_attribute] ([attribute])
+ON [FLOWBYTE_DIM];

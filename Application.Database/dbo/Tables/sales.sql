@@ -21,7 +21,6 @@
     CONSTRAINT PK_sales PRIMARY KEY ([company_id], [line_no], [channel_no], [pos_no], [transaction_no]), 
     CONSTRAINT [FK_sales_company] FOREIGN KEY ([company_id]) REFERENCES [company]([id]),
     CONSTRAINT [FK_sales_company_id_item_no] FOREIGN KEY ([company_id],[item_no]) REFERENCES [item]([company_id],[item_no]), 
-    
-    
        
 )
+ON [FLOWBYTE_TRANS];

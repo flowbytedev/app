@@ -20,7 +20,9 @@
      
     
 )
+ON [FLOWBYTE_DIM];
 GO
 
 
 CREATE INDEX [IX_customer_company_id_customer_id] ON [dbo].[customer] ([company_id],[customer_id])
+ON [FLOWBYTE_DIM];

@@ -3,5 +3,8 @@
     [name]        NVARCHAR (MAX) NOT NULL,
     [description] NVARCHAR (MAX) NOT NULL,
     CONSTRAINT [PK_application_page] PRIMARY KEY CLUSTERED ([id] ASC)
-);
+    
+)
+ON [FLOWBYTE_DIM];
+
 

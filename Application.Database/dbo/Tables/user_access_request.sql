@@ -15,20 +15,24 @@
     CONSTRAINT [FK_user_access_request_application_page_application_page_id] FOREIGN KEY ([application_page_id]) REFERENCES [dbo].[application_page] ([id]),
     CONSTRAINT [FK_user_access_request_application_user_application_user_id] FOREIGN KEY ([application_user_id]) REFERENCES [dbo].[application_user] ([id]),
     CONSTRAINT [FK_user_access_request_company_company_id] FOREIGN KEY ([company_id]) REFERENCES [dbo].[company] ([id])
-);
+)
+ON [FLOWBYTE_DIM];
 
 
 GO
 CREATE NONCLUSTERED INDEX [IX_user_access_request_application_page_id]
-    ON [dbo].[user_access_request]([application_page_id] ASC);
+    ON [dbo].[user_access_request]([application_page_id] ASC)
+    ON [FLOWBYTE_DIM];
 
 
 GO
 CREATE NONCLUSTERED INDEX [IX_user_access_request_application_user_id]
-    ON [dbo].[user_access_request]([application_user_id] ASC);
+    ON [dbo].[user_access_request]([application_user_id] ASC)
+    ON [FLOWBYTE_DIM];
 
 
 GO
 CREATE NONCLUSTERED INDEX [IX_user_access_request_company_id]
-    ON [dbo].[user_access_request]([company_id] ASC);
+    ON [dbo].[user_access_request]([company_id] ASC)
+    ON [FLOWBYTE_DIM];
 

@@ -9,12 +9,15 @@
     CONSTRAINT [FK_item_company] FOREIGN KEY ([company_id]) REFERENCES [company]([id])     
      
 )
+ON [FLOWBYTE_DIM];
 
 
 GO
 
 CREATE INDEX [IX_item_title] ON [dbo].[item] ([title])
+ON [FLOWBYTE_DIM];
 
 GO
 
 CREATE INDEX [IX_item_brand] ON [dbo].[item] ([brand])
+ON [FLOWBYTE_DIM];
