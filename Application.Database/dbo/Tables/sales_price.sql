@@ -10,6 +10,7 @@
     CONSTRAINT [PK_sales_price] PRIMARY KEY ([company_id], [item_no], [date]), 
     CONSTRAINT [FK_sales_price_company] FOREIGN KEY ([company_id]) REFERENCES [company]([id]), 
     CONSTRAINT [FK_sales_price_item] FOREIGN KEY ([company_id],[item_no]) REFERENCES [item]([company_id],[item_no]), 
+    CONSTRAINT [FK_sales_price_currency] FOREIGN KEY ([currency_code]) REFERENCES [currency]([code]), 
 )
 
 GO
