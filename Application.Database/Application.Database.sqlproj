@@ -232,6 +232,7 @@
     <Build Include="FLOWBYTE_DIM.sql" />
     <Build Include="FLOWBYTE_TRANS.sql" />
     <Build Include="FLOWBYTE_RT.sql" />
+    <Build Include="FLOWBYTE_SALES.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="Application.Database.refactorlog" />
