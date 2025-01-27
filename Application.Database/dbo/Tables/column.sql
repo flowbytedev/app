@@ -1,5 +1,5 @@
 ﻿CREATE TABLE [dbo].[column] (
-    [id]          NVARCHAR (450) NOT NULL,
+    [id]          NVARCHAR (255) NOT NULL,
     [table_id]    NVARCHAR (450) NOT NULL,
     [name]        NVARCHAR (450) NOT NULL,
     [created_on]  DATETIME2 (7)  NULL,

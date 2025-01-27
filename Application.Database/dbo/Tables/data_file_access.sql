@@ -1,5 +1,5 @@
 ﻿CREATE TABLE [dbo].[data_file_access] (
-    [data_file_id]        NVARCHAR (450) NOT NULL,
+    [data_file_id]        NVARCHAR (255) NOT NULL,
     [application_user_id] NVARCHAR (450) NOT NULL,
     [access_type]         INT            NOT NULL,
     CONSTRAINT [PK_data_file_access] PRIMARY KEY CLUSTERED ([data_file_id] ASC, [application_user_id] ASC),
