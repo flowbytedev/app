@@ -1,7 +1,10 @@
 using Application.Shared.Models;
 using Application.Shared.Models.Admin;
 using Application.Shared.Models.Data;
+using Application.Shared.Models.Inventory;
+using Application.Shared.Models.Org;
 using Application.Shared.Models.RealTime;
+using Application.Shared.Models.Sales;
 using Application.Shared.Models.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -59,6 +62,46 @@ namespace Application.Data
             modelBuilder.Entity<IdentityUserRole<string>>(b =>
             {
                 b.ToTable("user_role");
+            });
+
+
+            //modelBuilder.Entity<Item>(b =>
+            //{
+            //    b.HasMany(e => e.Variants)
+            //    .WithOne(e => e.Item)
+            //    .HasPrincipalKey(e => new { e.CompanyId, e.ItemNo })
+            //    .HasForeignKey(e => new { e.CompanyId, e.ItemNo })
+            //    .IsRequired(false);
+            //});
+
+            modelBuilder.Entity<Item>(b =>
+            {
+                b.HasMany(e => e.VariantOptions)
+                .WithOne(e => e.Item)
+                .HasPrincipalKey(e => new { e.CompanyId, e.Code })
+                .HasForeignKey(e => new { e.CompanyId, e.ItemCode })
+                .IsRequired(false);
+            });
+
+            modelBuilder.Entity<Variant>(b =>
+            {
+                
+
+                b.HasMany(e => e.SalesPrices)
+                .WithOne(e => e.Variant)
+                .HasPrincipalKey(e => new { e.CompanyId, e.ItemCode, e.VariantCode })
+                .HasForeignKey(e => new { e.CompanyId, e.ItemCode, e.VariantCode })
+                .IsRequired(false);
+
+            });
+
+            modelBuilder.Entity<VariantOption>(b =>
+            {
+                b.HasMany(e => e.Variants)
+                .WithOne(e => e.VariantOption)
+                .HasPrincipalKey(e => new { e.CompanyId, e.ItemCode, e.Name })
+                .HasForeignKey(e => new { e.CompanyId, e.ItemCode, e.VariantOptionName })
+                .IsRequired(false);
             });
 
 
@@ -121,6 +164,8 @@ namespace Application.Data
         public DbSet<CompanyDomain> CompanyDomain { get; set; }
 
         public DbSet<ApplicationUser> ApplicationUser { get; set; }
+        public DbSet<SalesChannel> SalesChannel { get; set; }
+        public DbSet<SalesForecastByStore> SalesForecastByStore { get; set; }
 
         public DbSet<Database> Database { get; set; }
 
@@ -135,6 +180,7 @@ namespace Application.Data
         public DbSet<DataFile> DataFile { get; set; }
         
         public DbSet<DataFileAccess> DataFileAccess { get; set; }
+        public DbSet<FieldMapping> FieldMapping { get; set; }
         
 
 

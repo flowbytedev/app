@@ -9,12 +9,29 @@ using System.Threading.Tasks;
 
 namespace Application.Shared.Models;
 
-public class Company : BaseModel
+public class Company
 {
     [Key]
     [MaxLength(10)]
     public string? Id { get; set; }
 
     public string? Name { get; set; }
+
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public DateTime? CreatedOn { get; set; } = DateTime.Now;
+
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public DateTime? ModifiedOn { get; set; } = DateTime.Now;
+
+
+    public string? CreatedBy { get; set; }
+    public string? ModifiedBy { get; set; }
+
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public bool? IsDeleted { get; set; } = false;
+
+
+    [NotMapped]
+    public bool IsSelected { get; set; }
 
 }

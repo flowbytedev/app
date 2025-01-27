@@ -20,15 +20,18 @@
     [lockout_enabled]        BIT                NOT NULL,
     [access_failed_count]    INT                NOT NULL,
     CONSTRAINT [PK_application_user] PRIMARY KEY CLUSTERED ([id] ASC)
-);
+)
+ON [FLOWBYTE_DIM];
 
 
 GO
 CREATE NONCLUSTERED INDEX [EmailIndex]
-    ON [dbo].[application_user]([normalized_email] ASC);
+    ON [dbo].[application_user]([normalized_email] ASC)
+    ON [FLOWBYTE_DIM];
 
 
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [UserNameIndex]
-    ON [dbo].[application_user]([normalized_user_name] ASC) WHERE ([normalized_user_name] IS NOT NULL);
+    ON [dbo].[application_user]([normalized_user_name] ASC) WHERE ([normalized_user_name] IS NOT NULL)
+    ON [FLOWBYTE_DIM];
 

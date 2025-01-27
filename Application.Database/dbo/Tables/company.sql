@@ -7,5 +7,6 @@
     [modified_by] NVARCHAR (MAX) NULL,
     [is_deleted]  BIT            NULL,
     CONSTRAINT [PK_company] PRIMARY KEY CLUSTERED ([id] ASC)
-);
+)
+ON [FLOWBYTE_DIM];
 
