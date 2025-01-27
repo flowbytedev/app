@@ -12,12 +12,12 @@
     CONSTRAINT [FK_sales_price_item] FOREIGN KEY ([company_id],[item_no]) REFERENCES [item]([company_id],[item_no]), 
     CONSTRAINT [FK_sales_price_currency] FOREIGN KEY ([currency_code]) REFERENCES [currency]([code]), 
 )
-ON [FLOWBYTE_TRANS];
+ON [FLOWBYTE_SALES];
 
 GO
 
 CREATE INDEX [IX_sales_price_company_id_item_no] ON [dbo].[sales_price] ([company_id],[item_no])
-ON [FLOWBYTE_TRANS];
+ON [FLOWBYTE_SALES];
 
 GO
 

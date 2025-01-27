@@ -18,9 +18,9 @@
     [specific_regressors] NVARCHAR(MAX) NULL, 
     CONSTRAINT [PK_sales_forecast_by_group_components] PRIMARY KEY NONCLUSTERED ([date], [store_group], [model])
 )
-ON [FLOWBYTE_TRANS];
+ON [FLOWBYTE_SALES];
 
 GO
 
 CREATE CLUSTERED INDEX [IX_sales_forecast_by_group_components_Column] ON [dbo].[sales_forecast_by_group_components] ([date])
-ON [FLOWBYTE_TRANS];
+ON [FLOWBYTE_SALES];

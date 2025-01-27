@@ -23,4 +23,4 @@
     CONSTRAINT [FK_sales_company_id_item_no] FOREIGN KEY ([company_id],[item_no]) REFERENCES [item]([company_id],[item_no]), 
        
 )
-ON [FLOWBYTE_TRANS];
+ON [FLOWBYTE_SALES];
