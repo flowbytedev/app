@@ -74,35 +74,35 @@ namespace Application.Data
             //    .IsRequired(false);
             //});
 
-            modelBuilder.Entity<Item>(b =>
-            {
-                b.HasMany(e => e.VariantOptions)
-                .WithOne(e => e.Item)
-                .HasPrincipalKey(e => new { e.CompanyId, e.Code })
-                .HasForeignKey(e => new { e.CompanyId, e.ItemCode })
-                .IsRequired(false);
-            });
+            //modelBuilder.Entity<Item>(b =>
+            //{
+            //    b.HasMany(e => e.VariantOptions)
+            //    .WithOne(e => e.Item)
+            //    .HasPrincipalKey(e => new { e.CompanyId, e.Code })
+            //    .HasForeignKey(e => new { e.CompanyId, e.ItemCode })
+            //    .IsRequired(false);
+            //});
 
-            modelBuilder.Entity<Variant>(b =>
-            {
+            //modelBuilder.Entity<Variant>(b =>
+            //{
                 
 
-                b.HasMany(e => e.SalesPrices)
-                .WithOne(e => e.Variant)
-                .HasPrincipalKey(e => new { e.CompanyId, e.ItemCode, e.VariantCode })
-                .HasForeignKey(e => new { e.CompanyId, e.ItemCode, e.VariantCode })
-                .IsRequired(false);
+            //    b.HasMany(e => e.SalesPrices)
+            //    .WithOne(e => e.Variant)
+            //    .HasPrincipalKey(e => new { e.CompanyId, e.ItemCode, e.VariantCode })
+            //    .HasForeignKey(e => new { e.CompanyId, e.ItemCode, e.VariantCode })
+            //    .IsRequired(false);
 
-            });
+            //});
 
-            modelBuilder.Entity<VariantOption>(b =>
-            {
-                b.HasMany(e => e.Variants)
-                .WithOne(e => e.VariantOption)
-                .HasPrincipalKey(e => new { e.CompanyId, e.ItemCode, e.Name })
-                .HasForeignKey(e => new { e.CompanyId, e.ItemCode, e.VariantOptionName })
-                .IsRequired(false);
-            });
+            //modelBuilder.Entity<VariantOption>(b =>
+            //{
+            //    b.HasMany(e => e.Variants)
+            //    .WithOne(e => e.VariantOption)
+            //    .HasPrincipalKey(e => new { e.CompanyId, e.ItemCode, e.Name })
+            //    .HasForeignKey(e => new { e.CompanyId, e.ItemCode, e.VariantOptionName })
+            //    .IsRequired(false);
+            //});
 
 
 
@@ -165,7 +165,7 @@ namespace Application.Data
 
         public DbSet<ApplicationUser> ApplicationUser { get; set; }
         public DbSet<SalesChannel> SalesChannel { get; set; }
-        public DbSet<SalesForecastByStore> SalesForecastByStore { get; set; }
+        //public DbSet<SalesForecastByStore> SalesForecastByStore { get; set; }
 
         public DbSet<Database> Database { get; set; }
 
@@ -182,11 +182,6 @@ namespace Application.Data
         public DbSet<DataFileAccess> DataFileAccess { get; set; }
         public DbSet<FieldMapping> FieldMapping { get; set; }
         
-
-
-
-
-        //public DbSet<FieldMapping> FieldMapping { get; set; }
 
 
         /// <summary>
