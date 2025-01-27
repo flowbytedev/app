@@ -2,7 +2,7 @@
 (
 	[company_id] NVARCHAR(10) NOT NULL, 
     [item_no] NVARCHAR(255) NOT NULL, 
-    [attribute] NVARCHAR(MAX) NOT NULL, 
+    [attribute] NVARCHAR(255) NOT NULL, 
     [value] NVARCHAR(MAX) NOT NULL, 
     CONSTRAINT [PK_item_attribute] PRIMARY KEY ([company_id], [item_no], [attribute]), 
     CONSTRAINT [FK_item_attribute_company] FOREIGN KEY ([company_id]) REFERENCES [company]([id]), 

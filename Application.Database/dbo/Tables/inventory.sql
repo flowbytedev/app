@@ -4,7 +4,6 @@
     [item_no] NVARCHAR(255) NOT NULL, 
     [variant_no] NVARCHAR(255) NOT NULL, 
     [warehouse_code] NVARCHAR(255) NOT NULL, 
-    [date] DATE NOT NULL,
     [unit] NVARCHAR(50) NOT NULL,
     [amount] INT NOT NULL, 
     [inventory_type] NVARCHAR(255) NOT NULL, 
@@ -12,7 +11,7 @@
     [source_reference] NVARCHAR(255) NOT NULL, 
     [expiration_date] DATE NOT NULL, 
 
-    CONSTRAINT [PK_inventory] PRIMARY KEY ([company_id], [item_no], [variant_no], [warehouse_code], [date]), 
+    CONSTRAINT [PK_inventory] PRIMARY KEY NONCLUSTERED ([company_id], [item_no], [variant_no], [warehouse_code]), 
 
     CONSTRAINT [FK_inventory_company] FOREIGN KEY ([company_id]) REFERENCES [company]([id]),
     CONSTRAINT [FK_inventory_company_id_item_no] FOREIGN KEY ([company_id],[item_no]) REFERENCES [item]([company_id],[item_no]), 
