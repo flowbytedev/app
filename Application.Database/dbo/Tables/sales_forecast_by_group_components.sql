@@ -1,5 +1,6 @@
 ﻿CREATE TABLE [dbo].[sales_forecast_by_group_components]
 (
+    [company_id] NVARCHAR(10) NOT NULL, 
 	[date] DATETIME NOT NULL,
     [store_group] NVARCHAR(10) NOT NULL, 
     [model] NVARCHAR(255) NOT NULL, 
@@ -16,7 +17,8 @@
     [extra_regressors_lower] DECIMAL(38, 20) NULL, 
     [extra_regressors_upper] DECIMAL(38, 20) NULL, 
     [specific_regressors] NVARCHAR(MAX) NULL, 
-    CONSTRAINT [PK_sales_forecast_by_group_components] PRIMARY KEY NONCLUSTERED ([date], [store_group], [model])
+    CONSTRAINT [PK_sales_forecast_by_group_components] PRIMARY KEY NONCLUSTERED ([company_id], [date], [store_group], [model]) 
+    
 )
 ON [FLOWBYTE_SALES];
 
