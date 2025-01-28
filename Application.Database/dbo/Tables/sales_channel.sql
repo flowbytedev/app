@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[sales_channel] (
     [company_id]  NVARCHAR (10)  NOT NULL,
-    [code]        NVARCHAR (450) NOT NULL,
+    [code]        NVARCHAR (255) NOT NULL,
     [name]        NVARCHAR (MAX) NULL,
     [region]      NVARCHAR (MAX) NULL,
     [address]     NVARCHAR (MAX) NULL,
