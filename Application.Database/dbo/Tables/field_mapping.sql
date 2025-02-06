@@ -16,5 +16,5 @@
 	[default_value] [nvarchar](max) NULL
 	 
      
-) ON [CDM_DIM] TEXTIMAGE_ON [CDM_DIM]
+) ON [FLOWBYTE_DIM] TEXTIMAGE_ON [FLOWBYTE_DIM]
 GO
