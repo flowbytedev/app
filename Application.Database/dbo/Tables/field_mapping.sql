@@ -3,7 +3,7 @@
     [source_database] NVARCHAR(255) NOT NULL,
 	[source_table] [nvarchar](255) NOT NULL,
 	[source_column] [nvarchar](255) NOT NULL,
-	[destincation_host] NVARCHAR(255) NOT NULL, 
+	[destination_host] NVARCHAR(255) NOT NULL, 
     [destination_database] NVARCHAR(255) NOT NULL,
 	[destination_table] [nvarchar](255) NOT NULL,
 	[destination_column] [nvarchar](255) NOT NULL,

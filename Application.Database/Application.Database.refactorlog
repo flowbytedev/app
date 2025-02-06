@@ -119,4 +119,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="is_attribute_key" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="a276836a-d7d8-4c24-b0df-528f519b2d02" ChangeDateTime="02/06/2025 17:58:33">
+    <Property Name="ElementName" Value="[dbo].[table_mapping].[destincation_host]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[table_mapping]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="destination_host" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5a8bfda5-4ddc-4784-8ed6-12daca63fb9c" ChangeDateTime="02/06/2025 17:58:50">
+    <Property Name="ElementName" Value="[dbo].[field_mapping].[destincation_host]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[field_mapping]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="destination_host" />
+  </Operation>
 </Operations>
