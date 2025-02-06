@@ -13,7 +13,8 @@
 	[is_sum] [bit] NULL,
 	[is_count] [bit] NULL,
 	[filter_query] [nvarchar](max) NULL,
-	[default_value] [nvarchar](max) NULL
+	[default_value] [nvarchar](max) NULL, 
+    [is_attribute] TINYINT NULL
 	 
      
 ) ON [FLOWBYTE_DIM] TEXTIMAGE_ON [FLOWBYTE_DIM]
