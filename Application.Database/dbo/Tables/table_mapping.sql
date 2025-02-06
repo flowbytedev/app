@@ -8,5 +8,6 @@
     [destination_database] NVARCHAR(255) NULL,
 	[destination_table] [nvarchar](255) NULL,
 	[destination_api_endpoint] NVARCHAR(MAX) NULL,
-	[query] [nvarchar](MAX) NULL,
+	[query] [nvarchar](MAX) NULL, 
+    [is_attribute] TINYINT NULL,
 ) ON [FLOWBYTE_DIM] TEXTIMAGE_ON [FLOWBYTE_DIM]
