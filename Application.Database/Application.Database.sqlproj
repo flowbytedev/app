@@ -235,6 +235,7 @@
     <Build Include="FLOWBYTE_SALES.sql" />
     <Build Include="dbo\Tables\sales_forecast_by_sales_channel.sql" />
     <Build Include="dbo\Tables\sales_forecast_by_sales_channel_components.sql" />
+    <Build Include="dbo\Tables\table_mapping.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="Application.Database.refactorlog" />
