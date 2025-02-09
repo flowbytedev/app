@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[warehouse]
 (
-	[company_id] NVARCHAR(10) NOT NULL, 
+	[cdc_key] BIGINT NULL,
+    [company_id] NVARCHAR(10) NOT NULL, 
     [code] NVARCHAR(255) NOT NULL, 
     [name] NVARCHAR(255) NOT NULL, 
     [address] NVARCHAR(255) NOT NULL, 
@@ -10,6 +11,10 @@
     [latitude] DECIMAL(18, 6) NULL, 
     [longitude] DECIMAL(18, 6) NULL, 
     [email] NVARCHAR(255) NULL, 
+    [cost_center] NVARCHAR(255) NULL, 
+    [is_in_transit_warehouse] TINYINT NULL, 
+    [store_group] NVARCHAR(255) NULL, 
+    [in_transit_warehouse_code] NVARCHAR(255) NULL, 
     CONSTRAINT [PK_warehouse] PRIMARY KEY ([company_id], [code]), 
     CONSTRAINT [FK_warehouse_company_id] FOREIGN KEY ([company_id]) REFERENCES [company]([id]) 
 )
