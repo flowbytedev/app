@@ -105,4 +105,39 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="date" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="939ed069-0a07-4c02-a024-d48707383ca3" ChangeDateTime="01/28/2025 11:03:52">
+    <Property Name="ElementName" Value="[dbo].[sales_forecast_by_store].[store_code]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[sales_forecast_by_store]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="sales_channel_code" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="622f1669-d03e-4064-84da-1416a19c365f" ChangeDateTime="02/06/2025 12:35:26">
+    <Property Name="ElementName" Value="[dbo].[field_mapping].[attribute_type]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[field_mapping]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="is_attribute_key" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a276836a-d7d8-4c24-b0df-528f519b2d02" ChangeDateTime="02/06/2025 17:58:33">
+    <Property Name="ElementName" Value="[dbo].[table_mapping].[destincation_host]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[table_mapping]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="destination_host" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5a8bfda5-4ddc-4784-8ed6-12daca63fb9c" ChangeDateTime="02/06/2025 17:58:50">
+    <Property Name="ElementName" Value="[dbo].[field_mapping].[destincation_host]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[field_mapping]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="destination_host" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b6f37a06-0bd4-49d4-9f55-2317b49ddfde" ChangeDateTime="02/07/2025 08:09:49">
+    <Property Name="ElementName" Value="[dbo].[table_mapping].[attribute_table]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[table_mapping]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="attribute_table_name" />
+  </Operation>
 </Operations>

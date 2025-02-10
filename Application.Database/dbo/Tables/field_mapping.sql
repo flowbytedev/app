@@ -1,16 +1,22 @@
-﻿CREATE TABLE [dbo].[field_mapping] (
-    [source_table]          NVARCHAR (255) NOT NULL,
-    [source_column]         NVARCHAR (255) NOT NULL,
-    [destination_table]     NVARCHAR (255) NOT NULL,
-    [destination_column]    NVARCHAR (255) NOT NULL,
-    [source_data_type]      NVARCHAR (MAX) NOT NULL,
-    [destination_data_type] NVARCHAR (MAX) NOT NULL,
-    [is_group_by]           BIT            NULL,
-    [is_sum]                BIT            NULL,
-    [is_count]              BIT            NULL,
-    [filter_query]          NVARCHAR (MAX) NULL,
-    [default_value]         NVARCHAR (MAX) NULL,
-    CONSTRAINT [PK_field_mapping] PRIMARY KEY NONCLUSTERED ([source_table] ASC, [source_column] ASC, [destination_table] ASC, [destination_column] ASC)
-)
-ON [FLOWBYTE_DIM];
-
+﻿CREATE TABLE [dbo].[field_mapping](
+	[source_host] NVARCHAR(255) NOT NULL, 
+    [source_database] NVARCHAR(255) NOT NULL,
+	[source_table] [nvarchar](255) NOT NULL,
+	[source_column] [nvarchar](255) NOT NULL,
+	[destination_host] NVARCHAR(255) NOT NULL, 
+    [destination_database] NVARCHAR(255) NOT NULL,
+	[destination_table] [nvarchar](255) NOT NULL,
+	[destination_column] [nvarchar](255) NOT NULL,
+	[source_data_type] [nvarchar](255) NOT NULL,
+	[destination_data_type] [nvarchar](255) NOT NULL,
+	[is_group_by] [bit] NULL,
+	[is_sum] [bit] NULL,
+	[is_count] [bit] NULL,
+	[filter_query] [nvarchar](max) NULL,
+	[default_value] [nvarchar](max) NULL, 
+    [is_attribute] TINYINT NULL, 
+    [is_attribute_key] TINYINT NULL
+	 
+     
+) ON [FLOWBYTE_DIM] TEXTIMAGE_ON [FLOWBYTE_DIM]
+GO
