@@ -10,5 +10,6 @@
 	[destination_api_endpoint] NVARCHAR(MAX) NULL,
 	[query] [nvarchar](MAX) NULL, 
     [is_attribute] TINYINT NULL, 
-    [attribute_table_name] NVARCHAR(255) NULL,
+    [attribute_table_name] NVARCHAR(255) NULL, 
+    [temp_table_name] NVARCHAR(255) NULL 
 ) ON [FLOWBYTE_DIM] TEXTIMAGE_ON [FLOWBYTE_DIM]
