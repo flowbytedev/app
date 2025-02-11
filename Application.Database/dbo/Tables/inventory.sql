@@ -1,10 +1,12 @@
 ﻿CREATE TABLE [dbo].[inventory]
 (
-	[company_id] NVARCHAR(10) NOT NULL, 
+	[cdc_key] bigint NOT NULL,
+    [company_id] NVARCHAR(10) NOT NULL, 
     [item_no] NVARCHAR(255) NOT NULL, 
     [variant_no] NVARCHAR(255) NOT NULL, 
     [warehouse_code] NVARCHAR(255) NOT NULL, 
     [unit] NVARCHAR(50) NOT NULL,
+    [quantity] DECIMAL(38,20),
     [amount] INT NOT NULL, 
     [inventory_type] NVARCHAR(255) NOT NULL, 
     [batch_no] NVARCHAR(255) NOT NULL, 
