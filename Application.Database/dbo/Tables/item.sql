@@ -5,6 +5,7 @@
     [title] NVARCHAR(255) NULL,
     [description] NVARCHAR(MAX) NULL, 
     [brand] NVARCHAR(255) NULL, 
+    [cdc_key] BIGINT NOT NULL, 
     CONSTRAINT [PK_item] PRIMARY KEY ([company_id], [item_no]), 
     CONSTRAINT [FK_item_company] FOREIGN KEY ([company_id]) REFERENCES [company]([id])     
      
