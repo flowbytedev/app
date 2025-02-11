@@ -12,5 +12,6 @@
     [is_attribute] TINYINT NULL, 
     [attribute_table_name] NVARCHAR(255) NULL, 
     [temp_table_name] NVARCHAR(255) NULL, 
-    [is_incremental] TINYINT NOT NULL DEFAULT 0 
+    [is_incremental] TINYINT NOT NULL DEFAULT 0, 
+    [incremental_column] NVARCHAR(255) NULL 
 ) ON [FLOWBYTE_DIM] TEXTIMAGE_ON [FLOWBYTE_DIM]
