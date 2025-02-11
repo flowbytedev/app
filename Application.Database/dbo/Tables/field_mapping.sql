@@ -15,8 +15,7 @@
 	[filter_query] [nvarchar](max) NULL,
 	[default_value] [nvarchar](max) NULL, 
     [is_attribute] TINYINT NOT NULL DEFAULT 0, 
-    [is_attribute_key] TINYINT NOT NULL DEFAULT 0, 
-    [temp_table_name] NVARCHAR(255) NULL 
+    [is_attribute_key] TINYINT NOT NULL DEFAULT 0 
 	 
      
 ) ON [FLOWBYTE_DIM] TEXTIMAGE_ON [FLOWBYTE_DIM]
