@@ -11,7 +11,7 @@
      
      
     
-    CONSTRAINT [PK_variant_option_value] PRIMARY KEY ([company_id], [item_no], [option_name]), 
+    CONSTRAINT [PK_variant_option_value] PRIMARY KEY ([company_id], [item_no], [variant_code],[option_name]), 
     CONSTRAINT [FK_variant_option_value_company] FOREIGN KEY ([company_id]) REFERENCES [company]([id]), 
     CONSTRAINT [FK_variant_option_value_item] FOREIGN KEY ([company_id],[item_no]) REFERENCES [item]([company_id],[item_no]), 
     CONSTRAINT [FK_variant_option_value_option_name] FOREIGN KEY ([company_id],[item_no],[option_name]) REFERENCES [variant_option]([company_id],[item_no],[name]) 
