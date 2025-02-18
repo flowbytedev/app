@@ -140,4 +140,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="attribute_table_name" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="14ce28f8-6200-4b3e-a569-8c5ebbbf5c2b" ChangeDateTime="02/18/2025 11:46:57">
+    <Property Name="ElementName" Value="[dbo].[sales_price_current].[IX_sales_price_company_id_item_no]" />
+    <Property Name="ElementType" Value="SqlIndex" />
+    <Property Name="ParentElementName" Value="[dbo].[sales_price_current]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[IX_sales_price_item_no_variant_code]" />
+  </Operation>
 </Operations>
