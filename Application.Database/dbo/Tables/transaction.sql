@@ -28,6 +28,6 @@
     [cost_amount_ac] DECIMAL(38, 20) NOT NULL, 
     CONSTRAINT [PK_transaction] PRIMARY KEY ([company_id], [warehouse_code], [posting_date], [entry_type], [document_type], [document_no]), 
     CONSTRAINT [FK_transaction_company] FOREIGN KEY ([company_id]) REFERENCES [company]([id]), 
-    CONSTRAINT [FK_transaction_variant_value] FOREIGN KEY ([company_id], [item_no], [variant_code]) REFERENCES [variant_option_value]([company_id], [item_no], [variant_code]), 
-    CONSTRAINT [FK_transaction_warehouse] FOREIGN KEY ([company_id], [warehouse_code]) REFERENCES [warehouse]([company_id], [code])
+    CONSTRAINT [FK_transaction_warehouse] FOREIGN KEY ([company_id], [warehouse_code]) REFERENCES [warehouse]([company_id], [code]), 
+    CONSTRAINT [FK_transaction_variant] FOREIGN KEY ([company_id], [item_no], [variant_code]) REFERENCES [variant]([company_id], [item_no], [variant_code])
 )
