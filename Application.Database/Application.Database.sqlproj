@@ -220,7 +220,7 @@
     <Build Include="dbo\Tables\variant_option_value.sql" />
     <Build Include="dbo\Tables\item_attribute.sql" />
     <Build Include="dbo\Tables\customer.sql" />
-    <Build Include="dbo\Tables\sales_price.sql" />
+    <Build Include="dbo\Tables\sales_price_current.sql" />
     <Build Include="dbo\Tables\inventory.sql" />
     <Build Include="dbo\Tables\warehouse.sql" />
     <Build Include="dbo\Tables\sales.sql" />
