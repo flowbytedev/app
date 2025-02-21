@@ -165,7 +165,7 @@ namespace Application.Data
 
         public DbSet<ApplicationUser> ApplicationUser { get; set; }
         public DbSet<SalesChannel> SalesChannel { get; set; }
-        //public DbSet<SalesForecastByStore> SalesForecastByStore { get; set; }
+        public DbSet<SalesForecastBySalesChannel> SalesForecastBySalesChannel { get; set; }
 
         public DbSet<Database> Database { get; set; }
 

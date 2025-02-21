@@ -3,7 +3,7 @@ using Application.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace Application.Services
+namespace Application.Services.Org
 {
     public class CompanyService : ICompanyService
     {
@@ -67,7 +67,7 @@ namespace Application.Services
             // get the first company with the domain
             var company = await _context.CompanyDomain.FirstOrDefaultAsync(d => d.Domain == domain);
 
-            if(company == null)
+            if (company == null)
             {
                 return null;
             }

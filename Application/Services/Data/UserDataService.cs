@@ -1,5 +1,6 @@
 ﻿using Application.Data;
 using Application.Models;
+using Application.Services.Org;
 using Application.Shared.Enums;
 using Application.Shared.Models;
 using Application.Shared.Models.Data;
@@ -8,7 +9,7 @@ using Azure.Storage.Blobs.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace Application.Services
+namespace Application.Services.Data
 {
     public class UserDataService : IUserDataService
     {
@@ -31,7 +32,7 @@ namespace Application.Services
                                                             DataFile? Filter = null,
                                                             string? orderBy = null,
                                                             SortDirection orderDirection = SortDirection.Ascending,
-                                                            Int64 CdcKey = 0)
+                                                            long CdcKey = 0)
         {
 
             var userDataFileAccess = await _context.DataFileAccess.Where(d => d.ApplicationUserId == userId).ToListAsync();
@@ -48,7 +49,7 @@ namespace Application.Services
 
 
             // Order by
-            if (!String.IsNullOrEmpty(orderBy))
+            if (!string.IsNullOrEmpty(orderBy))
             {
                 bool descending = orderDirection == SortDirection.Descending ? true : false;
                 query = _queryService.ApplyOrdering(query, orderBy, descending);

@@ -25,6 +25,12 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Application.Shared.Models.Data;
 using Application.Shared.Models;
 using Application.Helpers;
+using Application.Shared.Models.Org;
+using Application.Shared.Models.Sales;
+using Application.Services.Sales;
+using Application.Services.Org;
+using Application.Services.Data;
+using Application.Services.RealTime;
 
 
 
@@ -129,8 +135,12 @@ builder.Services.AddScoped<IDataService, DataService>();
 builder.Services.AddScoped<IAzureBlobService, AzureBlobService>();
 builder.Services.AddScoped<IRealTimeDataService, RealTimeDataService>();
 builder.Services.AddScoped<IUserDataService, UserDataService>();
+builder.Services.AddScoped<ISalesChannelService, SalesChannelService>();
+builder.Services.AddScoped<ISalesForecastService, SalesForecastService>();
 
 builder.Services.AddScoped<QueryService<DataFile>>();
+builder.Services.AddScoped<QueryService<SalesChannel>>();
+builder.Services.AddScoped<QueryService<SalesForecastBySalesChannel>>();
 
 
 

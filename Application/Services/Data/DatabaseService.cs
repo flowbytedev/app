@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Services;
+namespace Application.Services.Data;
 
 public class DatabaseService
 {
@@ -204,7 +204,8 @@ public class DatabaseService
 
         string query = "";
 
-        if(!String.IsNullOrEmpty(filterClause)) {
+        if (!string.IsNullOrEmpty(filterClause))
+        {
             query = $"SELECT * FROM {schema}.[{tableName}] WHERE {filterClause} ORDER BY {orderByClause} OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY";
         }
         else
@@ -254,7 +255,7 @@ public class DatabaseService
             await connection.OpenAsync();
             using (var command = new SqlCommand($"SELECT COUNT(*) FROM {tableName}", connection))
             {
-                totalRows = (int)(await command.ExecuteScalarAsync());
+                totalRows = (int)await command.ExecuteScalarAsync();
             }
         }
 

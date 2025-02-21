@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Application.Data;
 using Application.Shared.Models;
-using Application.Services;
 using Application.Shared.Models.User;
 using Microsoft.AspNetCore.Identity;
+using Application.Services.Org;
 
 namespace Application.Controllers
 {

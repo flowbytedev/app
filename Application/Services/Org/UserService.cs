@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Encodings.Web;
 using System.Text;
 
-namespace Application.Services
+namespace Application.Services.Org
 {
     public class UserService : IUserService
     {
@@ -21,7 +21,7 @@ namespace Application.Services
         private readonly IUserStore<ApplicationUser> _userStore;
         private readonly ICompanyService _companyService;
 
-        public UserService(ApplicationDbContext context, 
+        public UserService(ApplicationDbContext context,
                             UserManager<ApplicationUser> userManager,
                             IUserStore<ApplicationUser> userStore,
                             ICompanyService companyService)
@@ -85,7 +85,7 @@ namespace Application.Services
 
                 return null;
             }
-            
+
 
             // add the user as a member to the company
             await _companyService.AddCompanyMember(companyId, user.Id);

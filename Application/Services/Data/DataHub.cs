@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
 
 
-namespace Application.Services;
+namespace Application.Services.Data;
 
 public class DataHub : Hub
 {

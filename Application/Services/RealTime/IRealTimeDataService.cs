@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Shared.Services;
+namespace Application.Services.RealTime;
 
 public interface IRealTimeDataService
 {

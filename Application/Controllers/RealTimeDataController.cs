@@ -1,7 +1,7 @@
 ﻿using Application.Data;
-using Application.Services;
+using Application.Services.Data;
+using Application.Services.RealTime;
 using Application.Shared.Models.RealTime;
-using Application.Shared.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;

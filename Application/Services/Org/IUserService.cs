@@ -1,7 +1,7 @@
 ﻿using Application.Shared.Models;
 using Application.Shared.Models.User;
 
-namespace Application.Services
+namespace Application.Services.Org
 {
     public interface IUserService
     {

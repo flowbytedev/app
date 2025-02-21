@@ -1,6 +1,6 @@
 ﻿using Application.Shared.Models;
 
-namespace Application.Services
+namespace Application.Services.Org
 {
     public interface ICompanyService
     {

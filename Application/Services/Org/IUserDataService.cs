@@ -2,7 +2,7 @@
 using Application.Shared.Enums;
 using Application.Shared.Models.Data;
 
-namespace Application.Services;
+namespace Application.Services.Org;
 
 public interface IUserDataService
 {
@@ -13,7 +13,7 @@ public interface IUserDataService
                                                             DataFile? Filter,
                                                             string? orderBy,
                                                             SortDirection orderDirection,
-                                                            Int64 CdcKey);
+                                                            long CdcKey);
 
 
     Task<DataFile> GetDataFile(string id);
