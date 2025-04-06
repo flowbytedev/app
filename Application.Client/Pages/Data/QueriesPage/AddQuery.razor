@@ -1,0 +1,132 @@
+﻿@using Application.Shared.Services
+@inject HttpClient _httpClient
+@inject NavigationManager _navigationManager
+@inject IToastService _toastService
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+
+
+<EditForm Model="@QueryDetail" OnValidSubmit="@HandleValidSubmit" FormName="lottery_fluent_entry" novalidate>
+    <DataAnnotationsValidator />
+    <FluentValidationSummary />
+
+
+    <FluentStack Orientation="Orientation.Vertical">
+        <div>
+            <FluentNumberField Name="IP Address" @bind-Value="QueryDetail.Id" Disabled="@(true)" style="width: 100%;" Label="Id" />
+            <FluentValidationMessage For="@(() => QueryDetail.Id)" />
+        </div>
+
+        <div id="editorContainer" style="height: 400px; width: 100%; border: 1px solid #ccc;"></div>
+
+        <div>
+            <FluentTextField Name="Type" @bind-Value="QueryDetail.Description" Disabled="@(Disabled)" style="width: 100%;" Label="Description" Required />
+            <FluentValidationMessage For="@(() => QueryDetail.Description)" />
+        </div>
+
+        <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent">Submit</FluentButton>
+    </FluentStack>
+</EditForm>
+
+
+@code {
+
+    [Parameter] public string CompanyId { get; set; }
+    [Parameter] public string Action { get; set; }
+
+    [Parameter] public int Id { get; set; }
+
+    public QueryDetail QueryDetail { get; set; } = new QueryDetail();
+
+    public bool Disabled => (Action == "add" || Action == "edit") ? false : true;
+
+    private DotNetObjectReference<AddQuery>? objRef;
+    public string CurrentQuery { get; set; } = "";
+
+    public int BlockQuantity { get; set; }
+
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if ((Action == "edit" || Action == "details"))
+        {
+
+            QueryDetail = await _httpClient.GetFromJsonAsync<QueryDetail>($"api/queries/{Id}?c={CompanyId}");
+        }
+    }
+
+
+    
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            objRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("monacoInterop.init", "editorContainer", "sql", objRef);
+        }
+    }
+
+    [JSInvokable]
+    public void OnEditorContentChanged(string content)
+    {
+        CurrentQuery = content;
+        StateHasChanged();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (objRef is not null)
+        {
+            objRef.Dispose();
+        }
+    }
+
+
+
+    private async void HandleValidSubmit()
+    {
+
+        HttpResponseMessage response = new HttpResponseMessage();
+
+        QueryDetail.Query = CurrentQuery;
+
+        if (Action == "add")
+        {
+            response = await _httpClient.PostAsJsonAsync("api/queries", QueryDetail);
+        }
+        else if (Action == "edit")
+        {
+            response = await _httpClient.PutAsJsonAsync($"api/queries/{QueryDetail.Id}", QueryDetail);
+        }
+
+
+        if (response.IsSuccessStatusCode)
+        {
+            _toastService.ShowSuccess("A new queries was created");
+
+            // soft delay so that the user can read the message
+            await Task.Delay(1000);
+
+            _navigationManager.NavigateTo("data/queries/list", forceLoad: true);
+            
+        }
+        else
+        {
+            _toastService.ShowError("An error occurred while creating a new queries");
+        }
+
+
+
+    }
+
+
+
+
+
+
+
+
+}

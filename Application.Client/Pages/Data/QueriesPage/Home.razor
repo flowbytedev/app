@@ -1,0 +1,55 @@
+﻿@page "/data/queries/{Action?}/{Id?}"
+@inject NavigationManager _navigationManager
+@inject HttpClient _httpClient
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+
+
+<Toolbar Title="Servers">
+    <FluentButton Appearance="Appearance.Accent"
+    OnClick="@(() =>_navigationManager.NavigateTo($"data/queries/add?c={companyId}"))"
+                  IconEnd="@(new Icons.Regular.Size24.AddCircle().WithColor(Color.Fill))">
+        Add
+    </FluentButton>
+</Toolbar>
+
+@if (ShowTable())
+{
+    <QueriesList CompanyId="@companyId" />
+}
+else
+{
+    <AddQuery Action="@Action" CompanyId="@companyId" Id="@Id" />
+}
+
+
+@code {
+
+    [SupplyParameterFromQuery(Name = "c")]
+    private string? companyId { get; set; }
+
+    [Parameter] public string Action { get; set; } = "list";
+    [Parameter] public int Id { get; set; }
+
+    public IQueryable<QueryDetail> QueryDetails { get; set; }
+
+    private IQueryable<QueryDetail>? items;
+    private QueryDetail Filter = new QueryDetail();
+    private Dictionary<string, string>? FilterQuery = new Dictionary<string, string>();
+
+    public bool ShowTable() => Action == "list" && !String.IsNullOrEmpty(companyId);
+
+    public QueryDetail QueryDetail { get; set; } = new QueryDetail();
+
+
+    // if parameter is changed
+    // protected override async Task OnParametersSetAsync()
+    // {
+    //     if ((Action == "edit" || Action == "details") && !String.IsNullOrEmpty(IpAddress))
+    //     {
+            
+    //         QueryDetail = await _httpClient.GetFromJsonAsync<QueryDetail>($"api/queryDetails/{IpAddress}/{Name}");
+    //     }
+    // }
+
+
+}

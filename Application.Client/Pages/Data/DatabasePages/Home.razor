@@ -1,0 +1,54 @@
+﻿@page "/data/databases/{Action?}/{IpAddress?}/{Name?}"
+@inject NavigationManager _navigationManager
+@inject HttpClient _httpClient
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+
+
+<Toolbar Title="Databases">
+    <FluentButton Appearance="Appearance.Accent"
+                  OnClick="@(() =>_navigationManager.NavigateTo($"data/databases/add?c={companyId}"))"
+                  IconEnd="@(new Icons.Regular.Size24.AddCircle().WithColor(Color.Fill))">
+        Add
+    </FluentButton>
+</Toolbar>
+
+
+@if (ShowTable())
+{
+    <DatabasesList CompanyId="@companyId" />
+}
+else
+{
+    <AddDatabase Action="@Action" IpAddress="@IpAddress" DatabaseName="@Name"/>
+}
+
+
+@code {
+
+    [SupplyParameterFromQuery(Name = "c")]
+    private string? companyId { get; set; }
+
+    [Parameter] public string Action { get; set; } = "list";
+    [Parameter] public string IpAddress { get; set; }
+    [Parameter] public string Name { get; set; }
+
+    public IQueryable<Database> Databases { get; set; }
+    private IQueryable<Database>? items;
+    private Database Filter = new Database();
+    private Dictionary<string, string>? FilterQuery = new Dictionary<string, string>();
+
+    public bool ShowTable() => Action == "list" && !String.IsNullOrEmpty(companyId);
+
+    public Database Database { get; set; } = new Database();
+
+
+    // protected override async Task OnParametersSetAsync()
+    // {
+    //     if ((Action == "edit" || Action == "details") && !String.IsNullOrEmpty(IpAddress))
+    //     {
+
+    //         Database = await _httpClient.GetFromJsonAsync<Database>($"api/databases/{IpAddress}/{Name}");
+    //     }
+    // }
+
+}

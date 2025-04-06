@@ -3,6 +3,13 @@ using Application.Shared.Models;
 namespace Application.Models;
 
 
+public enum ResponseStatus
+{
+    Success,
+    PartialSuccess,
+    Error
+}
+
 public class Response<T>
 {
     public T Items { get; set; }
@@ -12,7 +19,8 @@ public class Response<T>
 
     public int TotalItems { get; set; }
 
-
+    public ResponseStatus Status { get; set; }
+    public string Message { get; set; }
     public void SetTotalItems(int totalItems)
     {
         TotalItems = totalItems;

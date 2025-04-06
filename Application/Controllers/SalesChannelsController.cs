@@ -1,7 +1,7 @@
 ﻿using Application.Attributes;
 using Application.Helpers;
 using Application.Models;
-using Application.Services.Sales;
+using Application.Shared.Services.Sales;
 using Application.Shared.Enums;
 using Application.Shared.Models.Admin;
 using Application.Shared.Models.Data;

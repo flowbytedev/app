@@ -11,8 +11,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Application.Shared.Models;
 using System.Text.Json;
-using Application.Services.Sales;
-using Application.Services.Org;
+using Application.Shared.Services.Sales;
+using Application.Shared.Services.Org;
 
 namespace Application.Controllers;
 

@@ -51,12 +51,20 @@ namespace Application.Components.Account
                 var userId = principal.FindFirst(options.ClaimsIdentity.UserIdClaimType)?.Value;
                 var email = principal.FindFirst(options.ClaimsIdentity.EmailClaimType)?.Value;
 
+                // Retrieve roles from the principal using the RoleClaimType.
+                var roles = principal.FindAll(options.ClaimsIdentity.RoleClaimType)
+                                     .Select(claim => claim.Value)
+                                     .ToList();
+
+
                 if (userId != null && email != null)
                 {
                     state.PersistAsJson(nameof(UserInfo), new UserInfo
                     {
                         UserId = userId,
                         Email = email,
+                        Roles = roles
+
                     });
                 }
             }

@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Application.Data;
+using Application.Shared.Data;
 using Application.Shared.Models;
 using Application.Shared.Models.User;
 using Microsoft.AspNetCore.Identity;
-using Application.Services.Org;
+using Application.Shared.Services.Org;
 
 namespace Application.Controllers
 {

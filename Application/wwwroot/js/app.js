@@ -68,3 +68,16 @@ function updateRealTimeSalesKPI(valueId, lastUpdatedId, value, lastUpdated) {
 function printObject(obj) {
     console.log(obj);
 }
+
+
+
+
+
+
+//const themeToggle = document.getElementById('theme-toggle');
+
+// Check for saved theme preference or default to light
+const savedTheme = localStorage.getItem('theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+//themeToggle.checked = savedTheme === 'dark';
+

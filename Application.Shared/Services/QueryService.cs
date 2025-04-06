@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
 
-namespace Application.Services;
+namespace Application.Shared.Services;
 
 
 public enum ComparisonType
@@ -11,12 +11,12 @@ public enum ComparisonType
     GreaterThan
 }
 
-public class FilterCondition
-{
-    public string PropertyName { get; set; }
-    public object? Value { get; set; }
-    public string Comparison { get; set; } = "eq";
-}
+//public class FilterCondition
+//{
+//    public string PropertyName { get; set; }
+//    public object? Value { get; set; }
+//    public string Comparison { get; set; } = "eq";
+//}
 
 
 
@@ -46,15 +46,26 @@ public class QueryService<T>
                 var equals = Expression.Equal(Expression.Property(parameter, property.Name), Expression.Constant(propertyValue));
                 var lambda = Expression.Lambda<Func<T, bool>>(equals, parameter);
                 query = query.Where(lambda);
+
             }
 
-            else if ((propertyType != typeof(bool) && propertyType != typeof(bool?)) && propertyValue != null)
+            // if property is datetime
+            //else if ((propertyType == typeof(DateTime) || propertyType != typeof(DateTime?)) && propertyValue != null)
+            //{
+            //    //var equals = Expression.Equal(Expression.Property(parameter, property.Name), Expression.Constant(propertyValue));
+            //    //var lambda = Expression.Lambda<Func<T, bool>>(equals, parameter);
+            //    //query = query.Where(lambda);
+            //    continue;
+            //}
+
+            else if ((propertyType != typeof(bool) && propertyType != typeof(bool?) && propertyType != typeof(DateTime) && propertyType != typeof(DateTime?)) && propertyValue != null)
             {
                 
                 var left = Expression.Property(parameter, property.Name);
 
                 var right = Expression.Constant(propertyValue);
-                
+
+
                 Expression<Func<T, bool>>? lambda;
 
                 // if the property name is cdc_key, we want to get all that are greater than the value

@@ -1,0 +1,196 @@
+﻿@inject HttpClient _httpClient
+@inject IToastService _toastService
+@inject NavigationManager _navigationManager
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+
+<div style="@($"max-height: {TableHeigh}; overflow-x:auto; display:flex; background-color: var(--neutral-layer-1); padding: 4px")">
+    <FluentDataGrid @ref="dataGrid" 
+    Items="@items"
+    ResizableColumns=true
+    ResizeType="@DataGridResizeType.Discrete"
+    HeaderCellAsButtonWithMenu="true"
+    Pagination="@pagination"
+    TGridItem="Table"
+    GridTemplateColumns="0.2fr 0.2fr 0.2fr 0.2fr"
+    ShowHover="true">
+
+
+        <PropertyColumn Property="@(c => c.Host)" InitialSortDirection=SortDirection.Descending Sortable="true" IsDefaultSortColumn=true Filtered="!string.IsNullOrWhiteSpace(Filter.Host)">
+            <ColumnOptions>
+                <div class="search-box">
+                    <FluentSearch type="search" Autofocus=true @bind-Value="@Filter.Host" @bind-Value:after="@(() => HandleFilter())" Placeholder="IP Address..." />
+                </div>
+            </ColumnOptions>
+        </PropertyColumn>
+
+        <PropertyColumn Property="@(c => c.DatabaseName)" InitialSortDirection=SortDirection.Descending Sortable="true" IsDefaultSortColumn=true Filtered="!string.IsNullOrWhiteSpace(Filter.DatabaseName)">
+            <ColumnOptions>
+                <div class="search-box">
+                    <FluentSearch type="search" Autofocus=true @bind-Value="@Filter.DatabaseName" @bind-Value:after="@(() => HandleFilter())" Placeholder="Database..." />
+                </div>
+            </ColumnOptions>
+        </PropertyColumn>
+
+        <PropertyColumn Property="@(c => c.Schema)" InitialSortDirection=SortDirection.Descending Sortable="true" IsDefaultSortColumn=true Filtered="!string.IsNullOrWhiteSpace(Filter.Schema)">
+            <ColumnOptions>
+                <div class="search-box">
+                    <FluentSearch type="search" Autofocus=true @bind-Value="@Filter.Schema" @bind-Value:after="@(() => HandleFilter())" Placeholder="Schema..." />
+                </div>
+            </ColumnOptions>
+        </PropertyColumn>
+
+        <PropertyColumn Property="@(c => c.Name)" InitialSortDirection=SortDirection.Descending Sortable="true" IsDefaultSortColumn=true Filtered="!string.IsNullOrWhiteSpace(Filter.Name)">
+            <ColumnOptions>
+                <div class="search-box">
+                    <FluentSearch type="search" Autofocus=true @bind-Value="@Filter.Name" @bind-Value:after="@(() => HandleFilter())" Placeholder="Name..." />
+                </div>
+            </ColumnOptions>
+        </PropertyColumn>
+
+
+
+
+        <TemplateColumn Title="Actions" Align="@Align.Center">
+            <FluentButton aria-label="Edit item" Appearance="Appearance.Stealth" IconEnd="@(new Icons.Regular.Size12.Edit())" OnClick="@(() => _navigationManager.NavigateTo($"data/tables/edit/{context.Host}/{context.Name}?c={CompanyId}"))" />
+            <FluentButton aria-label="Delete item" Appearance="Appearance.Stealth" IconEnd="@(new Icons.Regular.Size12.Delete())" OnClick="@(() => OnDeleteClick(context))" />
+        </TemplateColumn>
+
+
+
+    </FluentDataGrid>
+</div>
+
+<FluentPaginator State="@pagination">
+    <SummaryTemplate>
+        There are <strong>@(pagination.TotalItemCount ?? 0)</strong> rows
+    </SummaryTemplate>
+    <PaginationTextTemplate>
+        This is page <strong>@(pagination.CurrentPageIndex + 1)</strong> out of a total of <strong>@(pagination.LastPageIndex + 1)</strong> pages
+    </PaginationTextTemplate>
+</FluentPaginator>
+
+
+
+@code {
+
+    [Parameter] public string CompanyId { get; set; }
+    [Parameter] public string? IpAddress { get; set; }
+    [Parameter] public string? DatabaseName { get; set; }
+        [Parameter] public string? TableHeigh { get; set; } = "800px"; 
+
+    private FluentDataGrid<Table> dataGrid;
+
+    private IQueryable<Table>? items;
+
+    public Table Filter { get; set; } = new Table();
+    private Dictionary<string, string>? FilterQuery = new Dictionary<string, string>();
+
+    PaginationState pagination = new PaginationState { ItemsPerPage = 100 };
+    string nameFilter = string.Empty;
+
+
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+
+        // var tables = await LoadData();
+        var tables = (await GetItem()).AsQueryable();
+        items = tables.AsQueryable();
+
+    }
+
+
+    public async Task<IEnumerable<Table>> GetItem(string? filterQuery = null)
+    {
+        // // add company id to client header
+        // _httpClient.DefaultRequestHeaders.Remove("X-Company-ID");
+        // _httpClient.DefaultRequestHeaders.Add("X-Company-ID", CompanyId);
+
+        // in case the tables parameters are assigned
+        if (IpAddress != null && DatabaseName != null)
+        {
+            Filter.Host = IpAddress;
+            Filter.DatabaseName = DatabaseName;
+
+            filterQuery = $"Filter.Host={IpAddress}&Filter.DatabaseName={DatabaseName}";
+        }
+
+
+        var items = await _httpClient.GetFromJsonAsync<Response<List<Table>>>($"api/tables?{filterQuery}");
+
+        return items.Items;
+    }
+
+    private async Task OnDeleteClick(Table table)
+    {
+
+        var response = await _httpClient.DeleteAsync($"api/tables/{table.Host}/{table.DatabaseName}/{table.Name}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            _toastService.ShowInfo($"Table *{table.Name}* deleted successfully");
+
+            // remove the deleted item from the list
+            items = items.Where(c => c.Host != table.Host && c.Name != table.Name);
+
+            await dataGrid.RefreshDataAsync();
+        }
+        else
+        {
+            _toastService.ShowError("An error occurred while deleting the host");
+        }
+    }
+
+    private async Task HandleFilter() //ChangeEventArgs args
+    {
+
+
+        UpdateFilterQueryWithReflection();
+
+        // Build something like "?Filter.Code=ABC&Filter.Name=XYZ"
+        string queryString = BuildFilterQueryString(FilterQuery);
+
+
+        items = (await GetItem(queryString)).AsQueryable();
+
+        dataGrid.RefreshDataAsync();
+
+
+    }
+
+
+    private string BuildFilterQueryString(Dictionary<string, string>? filterDict)
+    {
+        if (filterDict == null || filterDict.Count == 0)
+            return string.Empty;
+
+        // Convert each key-value pair into "Filter.Key=URL-ENCODED-VALUE"
+        var queryParams = filterDict.Select(
+            kvp => $"Filter.{kvp.Key}={Uri.EscapeDataString(kvp.Value)}"
+        );
+
+        // Join them with '&' and prepend a '?'
+        return string.Join("&", queryParams);
+    }
+
+
+    private void UpdateFilterQueryWithReflection()
+    {
+        FilterQuery.Clear();
+
+        var properties = typeof(Table).GetProperties();
+        foreach (var prop in properties)
+        {
+            var value = prop.GetValue(Filter);
+            if (value is string stringValue && !string.IsNullOrWhiteSpace(stringValue))
+            {
+                // Use the property name as key, e.g. "Code", "Name", etc.
+                FilterQuery[prop.Name] = stringValue;
+            }
+        }
+    }
+
+
+
+}
