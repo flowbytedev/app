@@ -1,0 +1,221 @@
+﻿@page "/data/custom/{dataFileId:nonfile?}"
+@using Application.Models
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@inject NavigationManager _navigationManager
+@inject HttpClient _client
+@inject IDialogService _dialogService
+@attribute [Authorize]
+
+
+<Toolbar Title="Data Files">
+    <ChildContent>
+        <FluentButton IconEnd="@(new Icons.Regular.Size16.ArrowUpload())"
+        Title="Filter"
+        Appearance="Appearance.Stealth"
+        OnClick="@(OnUploadClick)" />
+    </ChildContent>
+</Toolbar>
+
+
+@if (!String.IsNullOrEmpty(dataFileId) && Data is not null)
+{
+    <TableComponent TItem="Dictionary<string, object>"
+    Title="Data"
+    Items="@Data"
+    Columns="@Data.FirstOrDefault().Keys.ToArray()" />
+}
+
+else if (String.IsNullOrEmpty(dataFileId))
+{
+
+    <TableComponent 
+    grid="dataFileGrid"
+    TItem="DataFile" 
+    Title="Data Files" 
+    Items="@DataFiles"
+    Columns="@Columns"
+    HasOpen="true"
+    OnOpenClick="OnOpenHandle" 
+    HasDownload="true"
+    OnDownloadClick="DownloadDataFileAsCsv"
+    HasShare="true"
+    OnShareClick="OpenDialogAsync"/>
+}
+@* else
+{
+    <Spinner />
+} *@
+
+
+
+
+
+
+@code {
+    [SupplyParameterFromQuery(Name = "c")] private string? companyId { get; set; }
+
+    [Parameter] public string dataFileId { get; set;  }
+
+    private FluentDataGrid<DataFile> dataFileGrid;
+    private FluentDataGrid<Dictionary<string, object>>? dataGrid;
+
+    public List<DataFile> DataFiles { get; set; } = new List<DataFile>();
+    public DataFile DataFile { get; set; } = new DataFile();
+    public string[] Columns { get; set; } = new string[] { "FileName", "Description", "Tags" };
+
+    List<Dictionary<string, object>> Data { get; set; }
+
+
+    DataFile DialogData { get; set; } = new DataFile();
+
+    public string Email { get; set; }
+
+    private IList<string> PageRoles { get; set; }
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // add company to the header
+        _client.DefaultRequestHeaders.Remove("X-Company-ID");
+        _client.DefaultRequestHeaders.Add("X-Company-ID", companyId);
+
+        await FetchDataAsync();
+
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+
+        if (!String.IsNullOrEmpty(companyId))
+        {
+            // add company to the header
+            _client.DefaultRequestHeaders.Remove("X-Company-ID");
+            _client.DefaultRequestHeaders.Add("X-Company-ID", companyId);
+
+            await ValidateUserRoleAsync();
+
+            await FetchDataAsync();
+        }
+        
+    }
+
+
+
+    private async Task ValidateUserRoleAsync()
+    {
+        var pageRoles = await _client.GetFromJsonAsync<List<ApplicationPageRole>>("api/app/page-roles?page=Data");
+
+        PageRoles = pageRoles.Select(p => p.IdentityRoleId).ToArray();
+
+        var userRoles = await _client.GetFromJsonAsync<IList<string>>($"api/users/roles");
+
+
+        bool hasMatchingRole = PageRoles.Intersect(userRoles).Any();
+
+        if (!userRoles.Any(r => PageRoles.Contains(r)))
+        {
+            Console.WriteLine("You do not have access to this page");
+
+
+            _navigationManager.NavigateTo($"/unauthorized?c={companyId}&page=RealTimeSales");
+
+            return;
+        }
+    }
+
+
+    private async Task FetchDataAsync()
+    {
+        if (!String.IsNullOrEmpty(dataFileId))
+        {
+            Data = await _client.GetFromJsonAsync<List<Dictionary<string, object>>>($"api/userData/{dataFileId}");
+
+        }
+
+        else
+        {
+            var response = await _client.GetFromJsonAsync<Response<List<DataFile>>>("api/userData");
+
+            DataFiles = response.Items;
+        }
+
+
+        StateHasChanged();
+    }
+
+    private void OnOpenHandle(DataFile dataFile)
+    {
+        _navigationManager.NavigateTo($"data/{dataFile.Id}");
+    }
+
+    private async Task DownloadDataFileAsCsv(DataFile dataFile)
+    {
+        // Redirect to API endpoint to download the file
+        var downloadUrl = $"{_navigationManager.BaseUri}api/userData/{dataFile.Id}/download";
+        _navigationManager.NavigateTo(downloadUrl, true);
+    }
+
+    private void OnUploadClick()
+    {
+        _navigationManager.NavigateTo("data/upload");
+    }
+
+
+
+    private async Task OpenDialogAsync(DataFile dataFile)
+    {
+
+
+        var data = DialogData;
+
+        var dialog = await _dialogService.ShowDialogAsync(
+                    @<div>
+        <FluentTextField @bind-Value="@(Email)" Label="Enter an email:" Style="width:100%" />
+
+
+                    </div>
+    , new DialogParameters
+                    {
+                        Title = "Share your Data",
+                        Height = "240px",
+                        PreventDismissOnOverlayClick = true,
+                        PreventScroll = true,
+                    }
+        );
+
+        var result = await dialog.Result;
+
+        if (!result.Cancelled && result.Data != null)
+        {
+            
+
+            // TODO: Let the user choose the access type
+
+            DataFileAccessInput dataFileAccessInput = new DataFileAccessInput()
+            {
+                    DataFileId = dataFile.Id,
+                    Email = Email,
+                    AccessType = AccessType.Write
+            };
+
+
+            var response = await _client.PostAsJsonAsync("api/userData/share", dataFileAccessInput);
+
+            if (response.IsSuccessStatusCode)
+            {
+                await _dialogService.ShowSuccessAsync($"You Shared the data with {Email}");
+            }
+            else
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                await _dialogService.ShowErrorAsync($"An error occurred while sharing the data. {errorMessage}");
+            }
+
+            
+        }
+
+    }
+
+}

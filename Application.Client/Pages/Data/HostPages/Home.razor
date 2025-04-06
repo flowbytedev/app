@@ -1,0 +1,56 @@
+﻿@page "/data/hosts/{Action?}/{IpAddress?}/{Name?}"
+@inject NavigationManager _navigationManager
+@inject HttpClient _httpClient
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+
+
+<Toolbar Title="Servers">
+    <FluentButton Appearance="Appearance.Accent"
+    OnClick="@(() =>_navigationManager.NavigateTo($"data/hosts/add?c={companyId}"))"
+                  IconEnd="@(new Icons.Regular.Size24.AddCircle().WithColor(Color.Fill))">
+        Add
+    </FluentButton>
+</Toolbar>
+
+@if (ShowTable())
+{
+    <HostsList CompanyId="@companyId" />
+}
+else
+{
+    <AddHost Action="@Action" Host="@Host"/>
+}
+
+
+@code {
+
+    [SupplyParameterFromQuery(Name = "c")]
+    private string? companyId { get; set; }
+
+    [Parameter] public string Action { get; set; } = "list";
+    [Parameter] public string IpAddress { get; set; }
+    [Parameter] public string Name { get; set; }
+
+    public IQueryable<Host> Hosts { get; set; }
+
+    private IQueryable<Host>? items;
+    private Host Filter = new Host();
+    private Dictionary<string, string>? FilterQuery = new Dictionary<string, string>();
+
+    public bool ShowTable() => Action == "list" && !String.IsNullOrEmpty(companyId);
+
+    public Host Host { get; set; } = new Host();
+
+
+    // if parameter is changed
+    protected override async Task OnParametersSetAsync()
+    {
+        if ((Action == "edit" || Action == "details") && !String.IsNullOrEmpty(IpAddress))
+        {
+            
+            Host = await _httpClient.GetFromJsonAsync<Host>($"api/hosts/{IpAddress}/{Name}");
+        }
+    }
+
+
+}

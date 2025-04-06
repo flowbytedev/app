@@ -1,0 +1,245 @@
+﻿@page "/items"
+@using Application.Shared.Models.Inventory
+@inject HttpClient _client
+@inject NavigationManager _navigationManager
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+
+
+
+
+
+<Toolbar Title="Sales Channels">
+</Toolbar>
+
+
+
+
+<FluentGrid Spacing="1" AdaptiveRendering="true" Justify="@JustifyContent.FlexStart" Style="background-color: var(--neutral-layer-1); padding: 4px; border-radius: 5px; ">
+    <FluentGridItem xs="12">
+        <div style="height: 75vh; overflow-x:auto; display:flex;">
+            <FluentDataGrid 
+                @ref="itemDataGrid"
+                Items="@FilteredItems"
+                ResizableColumns=true
+                ResizeType="@DataGridResizeType.Exact"
+                HeaderCellAsButtonWithMenu="true"
+                Pagination="@pagination"
+                TGridItem="Item"
+                OnRowFocus="HandleRowFocus"
+                GridTemplateColumns="0.2fr 0.2  fr 0.2fr 0.2fr 0.2fr"
+                ShowHover="true">
+
+                <PropertyColumn Property="@(c => c.ItemNo)" InitialSortDirection=SortDirection.Descending Sortable="true" IsDefaultSortColumn=true Comparer="@StringLengthComparer.Instance" Filtered="!string.IsNullOrWhiteSpace(Filter.ItemNo)">
+                    <ColumnOptions>
+                        <div class="search-box">
+                            <FluentSearch type="search" Autofocus=true Immediate="true" ImmediateDelay="1000" @bind-Value="@Filter.ItemNo" @bind-Value:after="@(() => HandleFilter())" Placeholder="item..." />
+                        </div>
+                    </ColumnOptions>
+                </PropertyColumn>
+                <PropertyColumn Property="@(c => c.Title)" InitialSortDirection=SortDirection.Descending Sortable="true" IsDefaultSortColumn=true Comparer="@StringLengthComparer.Instance" Filtered="!string.IsNullOrWhiteSpace(Filter.Title)">
+                    <ColumnOptions>
+                        <div class="search-box">
+                            <FluentSearch type="search" Autofocus=true Immediate="true" ImmediateDelay="1000" @bind-Value="@Filter.Title" @bind-Value:after="@(() => HandleFilter())" Placeholder="title..." />
+                        </div>
+                    </ColumnOptions>
+                </PropertyColumn>
+
+                <PropertyColumn Property="@(c => c.Description)" Sortable="true" Align="Align.Start" />
+                <PropertyColumn Property="@(c => c.Brand)" Sortable="true" Align="Align.Start" />
+
+                <TemplateColumn Title="Actions" Align="@Align.End">
+                    @* <FluentButton aria-label="View Forecast" IconEnd="@(new Icons.Regular.Size16.ChartMultiple())" OnClick="@(() => _navigationManager.NavigateTo($"sales/items/variants?c={companyId}&itemNo={context.ItemNo}"))" /> *@
+                    @* <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Action
+                    </button> *@
+                    @* <button type="button" class="btn btn-light dropdown-toggle"
+                            data-bs-toggle="dropdown" aria-expanded="false"
+                            style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;">
+                        Action
+                    </button> *@
+
+                   @*  <ul class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 shadow w-220px" data-bs-theme="light">
+                        <li><a class="dropdown-item rounded-2 active" href="#">Action</a></li>
+                        <li><a class="dropdown-item rounded-2" href="#">Another action</a></li>
+                        <li><a class="dropdown-item rounded-2" href="#">Something else here</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item rounded-2" href="#">Separated link</a></li>
+                    </ul> *@
+                </TemplateColumn>
+
+            </FluentDataGrid>
+        </div>
+    </FluentGridItem>
+</FluentGrid>
+
+
+
+
+<FluentPaginator State="@pagination">
+    <SummaryTemplate>
+        There are <strong>@(pagination.TotalItemCount ?? 0)</strong> rows
+    </SummaryTemplate>
+    <PaginationTextTemplate>
+        This is page <strong>@(pagination.CurrentPageIndex + 1)</strong> out of a total of <strong>@(pagination.LastPageIndex + 1)</strong> pages
+    </PaginationTextTemplate>
+</FluentPaginator>
+
+
+
+@code {
+
+    [SupplyParameterFromQuery(Name = "c")] private string? companyId { get; set; }
+
+    // [SupplyParameterFromQuery(Name = "itemNo")] private string? itemNo { get; set; }
+    private FluentDataGrid<Item> itemDataGrid;
+    private IQueryable<Item>? items;
+    private List<Item> ItemsList => items is null ? new List<Item>() : items.ToList();
+    private Item Filter = new Item();
+    private Dictionary<string, string>? FilterQuery = new Dictionary<string, string>();
+
+    private PaginationState pagination = new PaginationState { ItemsPerPage = 1000 };
+
+    private string nameFilter = string.Empty;
+
+    bool open = false;
+
+    private GridSort<Item> rankSort = GridSort<Item>
+        .ByDescending(x => x.CompanyId)
+        .ThenDescending(x => x.ItemNo);
+
+    // Uncomment line below when using the TemplateColumn example for the country _name
+    // private GridSort<Item> nameSort = GridSort<Item>.ByAscending(x => x.ItemNo, StringLengthComparer.Instance);
+
+
+    private IQueryable<Item>? FilteredItems => items?.Where(x => x.ItemNo.Contains(nameFilter, StringComparison.CurrentCultureIgnoreCase));
+
+    protected override async Task OnParametersSetAsync()
+    {
+        items = (await GetItem()).AsQueryable();
+    }
+
+
+    public async Task<IEnumerable<Item>> GetItem(string? filterQuery = null)
+    {
+        // add company id to client header
+        _client.DefaultRequestHeaders.Remove("X-Company-ID");
+        _client.DefaultRequestHeaders.Add("X-Company-ID", companyId);
+
+        var items = await _client.GetFromJsonAsync<Response<List<Item>>>($"api/items?{filterQuery}");
+
+        return items.Items;
+    }
+
+
+    private void UpdateFilterQueryWithReflection()
+    {
+        FilterQuery.Clear();
+
+        var properties = typeof(Item).GetProperties();
+        foreach (var prop in properties)
+        {
+            var value = prop.GetValue(Filter);
+            if (value is string stringValue && !string.IsNullOrWhiteSpace(stringValue))
+            {
+                // Use the property name as key, e.g. "Code", "Name", etc.
+                FilterQuery[prop.Name] = stringValue;
+            }
+        }
+    }
+
+    private string BuildFilterQueryString(Dictionary<string, string>? filterDict)
+    {
+        if (filterDict == null || filterDict.Count == 0)
+            return string.Empty;
+
+        // Convert each key-value pair into "Filter.Key=URL-ENCODED-VALUE"
+        var queryParams = filterDict.Select(
+            kvp => $"Filter.{kvp.Key}={Uri.EscapeDataString(kvp.Value)}"
+        );
+
+        // Join them with '&' and prepend a '?'
+        return string.Join("&", queryParams);
+    }
+
+    private async Task HandleFilter() //ChangeEventArgs args
+    {
+
+        // foreach (var prop in typeof(Item).GetProperties())
+        // {
+        //     if (prop.Name == propertyName)
+        //     {
+        //         prop.SetValue(Filter, args.Value);
+        //     }
+        // }
+
+        UpdateFilterQueryWithReflection();
+
+        // Build something like "?Filter.Code=ABC&Filter.Name=XYZ"
+        string queryString = BuildFilterQueryString(FilterQuery);
+
+
+        items = (await GetItem(queryString)).AsQueryable();
+
+
+    }
+
+    // private async Task HandleFilter3(ChangeEventArgs args, string propertyName) //ChangeEventArgs args
+    // {
+    //     // if (args.Value is string value)
+    //     // {
+    //     //     nameFilter = value;
+    //     // }
+
+    //     foreach (var prop in typeof(Item).GetProperties())
+    //     {
+    //         if (prop.Name == propertyName)
+    //         {
+    //             prop.SetValue(Filter, args.Value);
+    //         }
+    //     }
+
+        
+    //     UpdateFilterQueryWithReflection();
+
+    //     // Build something like "?Filter.Code=ABC&Filter.Name=XYZ"
+    //     string queryString = BuildFilterQueryString(FilterQuery);
+
+        
+    //     items = (await GetItem(queryString)).AsQueryable();
+
+
+    // }
+
+    private void HandleClear()
+    {
+        if (string.IsNullOrWhiteSpace(nameFilter))
+        {
+            nameFilter = string.Empty;
+        }
+    }
+
+    private void HandleRowFocus(FluentDataGridRow<Item> row)
+    {
+        Console.WriteLine($"[Custom comparer] Row focused: {row.Item?.ItemNo}");
+    }
+
+    public class StringLengthComparer : IComparer<string>
+    {
+        public static readonly StringLengthComparer Instance = new StringLengthComparer();
+
+        public int Compare(string? x, string? y)
+        {
+            if (x is null)
+            {
+                return y is null ? 0 : -1;
+            }
+
+            if (y is null)
+            {
+                return 1;
+            }
+
+            return x.Length.CompareTo(y.Length);
+        }
+    }
+}

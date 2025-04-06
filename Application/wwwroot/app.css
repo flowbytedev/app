@@ -14,11 +14,41 @@ body {
     height: 100vh;
     font-family: var(--body-font);
     font-size: var(--type-ramp-base-font-size);
+    font-size: 13px;
     line-height: var(--type-ramp-base-line-height);
     font-weight: var(--font-weight);
     color: var(--neutral-foreground-rest);
     background: var(--neutral-fill-layer-rest);
 }
+
+
+:root {
+    /* Light theme variables */
+    --bg-color: #fafafa;
+    --container-bg: white;
+    --header-bg: #F0F2F6;
+    --header-color: #0E1117;
+    --text-color: #31333F;
+    --border-color: #E6E9EF;
+    --hover-bg: #F8F9FB;
+    --row-alt-bg: #FAFAFA;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Dark theme variables */
+[data-theme="dark"] {
+    --bg-color: #0E1117;
+    --container-bg: #1E2025;
+    --header-bg: #262730;
+    --header-color: #FAFAFA;
+    --text-color: #E6E9EF;
+    --border-color: #3B3F4B;
+    --hover-bg: #2D303A;
+    --row-alt-bg: #262730;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+}
+
+
 
 .navmenu-icon {
     display: none;

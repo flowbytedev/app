@@ -9,8 +9,8 @@ namespace Application.Shared.Models;
 
 public class BaseModel
 {
-    public string CompanyId { get; set; }
-    public Company Company { get; set; }
+    public string? CompanyId { get; set; }
+    public Company? Company { get; set; }
 
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public DateTime? CreatedOn { get; set; } = DateTime.Now;
@@ -22,10 +22,10 @@ public class BaseModel
     public string? CreatedBy { get; set; }
     public string? ModifiedBy { get; set; }
 
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public bool? IsDeleted { get; set; } = false;
+    //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    //public bool IsDeleted { get; set; } = false;
 
 
     [NotMapped]
-    public bool IsSelected { get; set; }
+    public bool? IsSelected { get; set; }
 }

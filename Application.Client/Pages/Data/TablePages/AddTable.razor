@@ -1,0 +1,92 @@
+﻿@using Application.Shared.Services
+@inject HttpClient _httpClient
+@inject NavigationManager _navigationManager
+@inject IToastService _toastService
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+
+
+<EditForm Model="@Table" OnValidSubmit="@HandleValidSubmit" FormName="lottery_fluent_entry" novalidate>
+    <DataAnnotationsValidator />
+    <FluentValidationSummary />
+
+
+    <FluentStack Orientation="Orientation.Horizontal">
+        <div>
+            <FluentTextField Name="IP Address" @bind-Value="Table.Host" Disabled="@(Action == "edit" ? true : Disabled)" style="width: 100%;" Label="IP Address" Required />
+            <FluentValidationMessage For="@(() => Table.Host)" />
+        </div>
+        <div>
+            <FluentTextField Name="Database" @bind-Value="Table.DatabaseName" Disabled="@Disabled" style="width: 100%;" Label="Type" Required />
+            <FluentValidationMessage For="@(() => Table.DatabaseName)" />
+        </div>
+        <div>
+            <FluentTextField Name="Name" @bind-Value="Table.Name" Disabled="@(Action == "edit" ? true : Disabled)" style="width: 100%;" Label="Name" Required />
+            <FluentValidationMessage For="@(() => Table.Name)" />
+        </div>
+
+        
+        <div>
+            <FluentButton style="margin-top:25px;" Type="ButtonType.Submit" Appearance="Appearance.Accent">Submit</FluentButton>
+        </div>
+    </FluentStack>
+</EditForm>
+
+
+
+
+
+
+@code {
+
+    [Parameter] public string Action { get; set; }
+
+    [Parameter] public Table Table { get; set; } = new Table();
+
+    public bool Disabled => (Action == "add" || Action == "edit") ? false : true;
+
+    
+
+    public int BlockQuantity { get; set; }
+
+
+
+    private async void HandleValidSubmit()
+    {
+        HttpResponseMessage response = new HttpResponseMessage();
+
+        if (Action == "add")
+        {
+            response = await _httpClient.PostAsJsonAsync("api/tables", Table);
+        }
+        else if (Action == "edit")
+        {
+            response = await _httpClient.PutAsJsonAsync($"api/tables/{Table.Host}/{Table.DatabaseName}/{Table.Name}", Table);
+        }
+
+
+        if (response.IsSuccessStatusCode)
+        {
+            _toastService.ShowSuccess("A new host was created");
+
+            // soft delay so that the user can read the message
+            await Task.Delay(1000);
+
+            _navigationManager.NavigateTo("data/tables/list",forceLoad: true);
+            
+        }
+        else
+        {
+            _toastService.ShowError("An error occurred while creating a new host");
+        }
+
+
+
+    }
+
+
+
+
+
+
+
+}

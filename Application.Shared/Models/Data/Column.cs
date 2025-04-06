@@ -8,13 +8,18 @@ using System.Threading.Tasks;
 
 namespace Application.Shared.Models.Data;
 
-[Index(nameof(TableId), nameof(Name), IsUnique = true)]
+[PrimaryKey(nameof(Host), nameof(DatabaseName), nameof(Schema), nameof(TableName), nameof(Name))]
 public class Column : BaseModel
 {
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public string Id { get; set; }
-
-    public string TableId { get; set; }
+    public string Host { get; set; }
+    public string DatabaseName { get; set; }
+    public string Schema { get; set; }
+    public string TableName { get; set; }
 
     public string Name { get; set; }
+
+    public string DataType { get; set; }
+
+    public int Precision { get; set; }
+    public int Scale { get; set; }
 }

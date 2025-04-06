@@ -1,4 +1,4 @@
-﻿@page "/admin/users"
+﻿@page "/admin/users/test"
 @inject HttpClient _client
 @inject NavigationManager _navigationManager
 @inject StateContainer _stateContainer
@@ -8,7 +8,7 @@
 
 
 
-@if(UsersQuery is not null)
+@* @if(UsersQuery is not null)
 {
     <TableComponent Items="Users" 
                     Columns="Columns" 
@@ -17,12 +17,14 @@
                     OnEditClick="@(HandleEditClick)"
                     HasDelete="true" 
                     OnToolbarAddClick="@(HandleToolbarAddClick)"/>
-}
+} *@
 
 
 
 @code {
 
+    [SupplyParameterFromQuery(Name = "c")]
+    private string? companyId { get; set; }
 
     private List<ApplicationUser> Users = new List<ApplicationUser>();
     // private IQueryable<Dictionary<string, object>> UsersQuery { get; set; }
@@ -34,13 +36,8 @@
     protected override async Task OnInitializedAsync()
     {
 
-        // add company to the request header
-        // first check if the company is set in state manager
-        if (_stateContainer.Company != null)
-        {
-            _client.DefaultRequestHeaders.Remove("X-Company-ID");
-            _client.DefaultRequestHeaders.Add("X-Company-ID", _stateContainer.Company.Id);
-        }
+        _client.DefaultRequestHeaders.Remove("X-Company-ID");
+        _client.DefaultRequestHeaders.Add("X-Company-ID", companyId);
 
 
        

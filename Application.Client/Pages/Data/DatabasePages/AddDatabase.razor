@@ -1,0 +1,201 @@
+﻿@using Application.Client.Pages.Data.TablePages
+@using Application.Shared.Services
+@using Application.Shared.Services.Data
+@inject HttpClient _httpClient
+@inject NavigationManager _navigationManager
+@inject IToastService _toastService
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+
+
+<EditForm Model="@Database" OnValidSubmit="@HandleValidSubmit" FormName="lottery_fluent_entry" novalidate>
+    <DataAnnotationsValidator />
+    <FluentValidationSummary />
+
+
+    <FluentStack Orientation="Orientation.Horizontal">
+        <div>
+            <FluentTextField Name="IP Address" @bind-Value="Database.Host" Disabled="@(Action == "edit" ? true : Disabled)" style="width: 100%;" Label="IP Address" Required />
+            <FluentValidationMessage For="@(() => Database.Host)" />
+        </div>
+
+        <div>
+            <FluentTextField Name="Name" @bind-Value="Database.Name" Disabled="@(Action == "edit" ? true : Disabled)" style="width: 100%;" Label="Name" Required />
+            <FluentValidationMessage For="@(() => Database.Name)" />
+        </div>
+
+        <div>
+            <FluentTextField Name="Type" @bind-Value="Database.Type" Disabled="@Disabled" style="width: 100%;" Label="Type" Required />
+            <FluentValidationMessage For="@(() => Database.Type)" />
+        </div>
+        <div>
+            <FluentButton style="margin-top:25px;" Type="ButtonType.Submit" Appearance="Appearance.Accent">Submit</FluentButton>
+        </div>
+    </FluentStack>
+</EditForm>
+
+
+
+
+<FluentTabs @bind-ActiveTabId="@activeid" OnTabChange="HandleOnTabChange" Style="margin-top:20px;">
+
+    <FluentTab Label="Data" Id="tab-1" DeferredLoading="@false">
+        <LoadingContent>
+            <FluentProgressRing />
+        </LoadingContent>
+        <Content>
+            <TablesList CompanyId="@CompanyId" IpAddress="@Database.Host" DatabaseName="@Database.Name" TableHeigh="700px" />
+        </Content>
+    </FluentTab>
+    @if (ChartDatasets is not null)
+    {
+        <FluentTab Label="Usage History" Id="tab-2" DeferredLoading="@false">
+            @if (activeid == "tab-2")
+            {
+                <LineChartV2 ChartId="databaseUsageChart" ChartLabels="@xLabels" ChartValues="@yValues"
+                             ChartDatasets="@ChartDatasets"
+                             Title="Database Storage Usage Over Time" />
+            }
+
+        </FluentTab>
+    }
+    
+
+</FluentTabs>
+
+
+
+
+
+
+
+
+@code {
+
+    [Parameter] public string CompanyId { get; set; }
+
+    [Parameter] public string Action { get; set; }
+    [Parameter] public string IpAddress { get; set; }
+    [Parameter] public string DatabaseName { get; set; }
+
+    public Database Database { get; set; } = new Database();
+    public List<TableStorageUsage> TableStorageUsages { get; set; } = new List<TableStorageUsage>();
+    public TableStorageUsage TableStorageUsageFilter { get; set; } = new TableStorageUsage();
+    public List<DatabaseStorageUsageByMonth> DatabaseStorageUsageByMonth { get; set; }
+    IEnumerable<ChartDataset> ChartDatasets { get; set; }
+
+    public bool Disabled => (Action == "add" || Action == "edit") ? false : true;
+
+    private string[] xLabels = new string[] { };
+
+    private decimal[] yValues = new decimal[] { };
+
+    public int BlockQuantity { get; set; }
+
+    string? activeid = "tab-1";
+
+    FluentTab? changedto;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if ((Action == "edit" || Action == "details") && !String.IsNullOrEmpty(IpAddress))
+        {
+
+            Database = await _httpClient.GetFromJsonAsync<Database>($"api/databases/{IpAddress}/{DatabaseName}");
+
+            TableStorageUsageFilter.Host = Database.Host;
+            TableStorageUsageFilter.DatabaseName = Database.Name;
+
+            var tableStoragefilterQuery = $"Filter.Host={IpAddress}&Filter.DatabaseName={DatabaseName}";
+
+            var tableStorageUsagesResponse = await _httpClient.GetFromJsonAsync<Response<List<TableStorageUsage>>>($"api/tables/storage/usage?{tableStoragefilterQuery}");
+
+            TableStorageUsages = tableStorageUsagesResponse.Items;
+
+            DatabaseStorageUsageByMonth = UsageGrouper.GroupDatabaseUsageByMonth(TableStorageUsages);
+
+
+            xLabels = DatabaseStorageUsageByMonth.Select(t => t.YearMonth).ToArray();
+
+            var allocatedSpaceGb = DatabaseStorageUsageByMonth.Select(t => t.AllocatedSpaceMb.Value / 1024).ToArray();
+            var usedSpaceGb = DatabaseStorageUsageByMonth.Select(t => t.UsedSpaceMb.Value / 1024).ToArray();
+            var rowCount = DatabaseStorageUsageByMonth.Select(t => Convert.ToDecimal(t.RowCount.Value)).ToArray();
+
+            var rowCountDataset = new ChartDataset
+                {
+                    Label = "Row Count",
+                    Values = rowCount,
+                    BorderColor = "#059669",
+                    BackgroundColor = "#ECFDF5"
+                };
+
+            var usedSpaceDataset = new ChartDataset
+                {
+                    Label = "Used Space (GB)",
+                    Values = usedSpaceGb,
+                    BorderColor = "#1D4ED8",
+                    BackgroundColor = "#DBEAFE"
+                };
+
+            var allocatedSpaceDataset = new ChartDataset
+                {
+                    Label = "Allocated Space (GB)",
+                    Values = allocatedSpaceGb,
+                    BorderColor = "#1D4ED8",
+                    BackgroundColor = "#DBEAFE"
+                };
+
+
+            ChartDatasets = new List<ChartDataset> { rowCountDataset, usedSpaceDataset, allocatedSpaceDataset };
+
+            
+        }
+    }
+
+    
+
+    private async void HandleValidSubmit()
+    {
+        HttpResponseMessage response = new HttpResponseMessage();
+
+        if (Action == "add")
+        {
+            response = await _httpClient.PostAsJsonAsync("api/databases", Database);
+        }
+        else if (Action == "edit")
+        {
+            response = await _httpClient.PutAsJsonAsync($"api/databases/{Database.Host}/{Database.Name}", Database);
+        }
+
+
+        if (response.IsSuccessStatusCode)
+        {
+            _toastService.ShowSuccess("A new host was created");
+
+            // soft delay so that the user can read the message
+            await Task.Delay(1000);
+
+            _navigationManager.NavigateTo("data/databases/list",forceLoad: true);
+            
+        }
+        else
+        {
+            _toastService.ShowError("An error occurred while creating a new host");
+        }
+
+
+
+    }
+
+
+    private void HandleOnTabChange(FluentTab tab)
+    {
+        changedto = tab;
+    }
+
+
+
+
+
+
+
+}

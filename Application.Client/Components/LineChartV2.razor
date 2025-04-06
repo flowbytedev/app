@@ -1,0 +1,152 @@
+﻿@using Application.Shared.Services.Data
+@inject IJSRuntime _jsRuntime
+
+<div class="chart-card">
+    <div class="chart-label">@Title</div>
+    <div class="chart-container">
+        <canvas id="@ChartId"></canvas>
+    </div>
+</div>
+
+
+
+
+@code {
+    [Parameter] public string ChartId { get; set; }
+    [Parameter] public string Title { get; set; }
+    [Parameter] public string ChartTitle { get; set; }
+    [Parameter] public string[] ChartLabels { get; set; }
+    [Parameter] public decimal[] ChartValues { get; set; }
+    [Parameter] public IEnumerable<ChartDataset> ChartDatasets { get; set; } = new List<ChartDataset>();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+
+        if (firstRender)
+        {
+            await LoadChartAsync();
+        }
+
+
+    }
+
+
+    private async Task ResetChart(string chartId)
+    {
+        // var config = GetChartConfig(new string[] { }, new List<ChartDataset>());
+        var config = GetChartConfig2(new string[] { }, new decimal[] { });
+
+        await _jsRuntime.InvokeVoidAsync("resetChart", "salesChart", config);
+    }
+
+
+    private async Task LoadChartAsync()
+    {
+
+
+        var chartConfig = GetChartConfig(ChartLabels, ChartDatasets);
+        await JSPrint(chartConfig);
+
+        // Pass chartConfig to JavaScript to render the chart
+        await _jsRuntime.InvokeVoidAsync("renderLineChart", ChartId, chartConfig);
+        
+        // var chartConfig2 = GetChartConfig2(ChartLabels, ChartValues);
+
+        // await JSPrint(chartConfig2);
+
+        // await _jsRuntime.InvokeVoidAsync("renderLineChart", ChartId, chartConfig2);
+
+
+
+    }
+
+    private async Task JSPrint(object obj)
+    {
+        await _jsRuntime.InvokeVoidAsync("printObject", obj);
+    }
+
+
+    private object GetChartConfig(string[] labels, IEnumerable<ChartDataset> datasets)
+    {
+
+        var chartConfig = new
+        {
+            type = "line",
+            data = new
+            {
+                labels,
+                datasets = datasets.Select(ds => new
+                {
+                    label = ds.Label,
+                    data = ds.Values,
+                    fill = true,
+                    borderColor = ds.BorderColor,
+                    backgroundColor = ds.BackgroundColor,
+                    tension = 0.4,
+                    pointRadius = 4,
+                    pointBackgroundColor = ds.BorderColor,
+                    pointBorderColor = "#fff",
+                    pointBorderWidth = 2
+                }).ToArray()
+            },
+            options = new
+            {
+                responsive = true,
+                plugins = new
+                {
+                    legend = new
+                    {
+                        position = "top"
+                    }
+                }
+            }
+        };
+
+        
+
+        return chartConfig;
+    }
+
+    private object GetChartConfig2(string[] labels, decimal[] values)
+    {
+        var chartConfig = new
+        {
+            type = "line",
+            data = new
+            {
+                labels,
+                datasets = new[]
+                {
+                    new
+                    {
+                        label = "Net Amount (ACY)",
+                        data = values,
+                        fill = true,
+                        borderColor = "#059669",
+                        backgroundColor = "#ECFDF5",
+                        tension = 0.4,
+                        pointRadius = 4,
+                        pointBackgroundColor = "#059669",
+                        pointBorderColor = "#fff",
+                        pointBorderWidth = 2
+                    }
+                }
+            },
+            options = new
+            {
+                responsive = true,
+                plugins = new
+                {
+                    legend = new
+                    {
+                        position = "top"
+                    }
+                }
+            }
+        };
+
+
+        return chartConfig;
+    }
+
+}

@@ -1,0 +1,242 @@
+﻿@page "/sales/channels/forecast"
+@inject HttpClient _client
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+
+
+
+
+<Toolbar Title="Sales Channels">
+</Toolbar>
+
+
+
+
+<FluentGrid Spacing="1" AdaptiveRendering="true" Justify="@JustifyContent.FlexStart" Style="background-color: var(--neutral-layer-1); padding: 4px; border-radius: 5px; ">
+    <FluentGridItem xs="12">
+        <div style="height: 75vh; overflow-x:auto; display:flex;">
+            <FluentDataGrid @ref="SalesForecastDataGrid"
+            Items="@FilteredItems"
+            Virtualize="@true"
+            ResizableColumns="@true"
+            ResizeType="@DataGridResizeType.Exact"
+            HeaderCellAsButtonWithMenu="true"
+            TGridItem="SalesForecastBySalesChannel"
+            OnRowFocus="HandleRowFocus"
+            GridTemplateColumns="0.2fr 0.2  fr 0.2fr 0.2fr 0.2fr"
+            RowStyle="@rowStyle"
+            ShowHover="@true">
+
+                <PropertyColumn Title="Date" Property="@(c => c.Date.Value.ToString("yyyy-MM-dd"))"  InitialSortDirection=SortDirection.Descending Sortable="true" IsDefaultSortColumn=true Comparer="@StringLengthComparer.Instance" Filtered="@(Filter.Date != null)">
+                    <ColumnOptions>
+                        <div class="search-box">
+                            <FluentDatePicker Label="Days view" AriaLabel="To" Immediate="true" ImmediateDelay="1000" Value="@Filter.Date" ValueChanged="@(() => HandleFilter())" />
+                        </div>
+                    </ColumnOptions>
+                </PropertyColumn>
+                <PropertyColumn Title="Sales Channel" Property="@(c => c.SalesChannelCode)" InitialSortDirection=SortDirection.Descending Sortable="true" IsDefaultSortColumn=true Comparer="@StringLengthComparer.Instance" Filtered="!string.IsNullOrWhiteSpace(Filter.SalesChannelCode)">
+                    <ColumnOptions>
+                        <div class="search-box">
+                            <FluentSearch type="search" Autofocus=true Immediate="true" ImmediateDelay="1000" @bind-Value="@Filter.SalesChannelCode" @bind-Value:after="@(() => HandleFilter())" Placeholder="Sales Channel..." />
+                        </div>
+                    </ColumnOptions>
+                </PropertyColumn>
+
+                <PropertyColumn Title="Amount" Property="@(c => c.Amount.Value.ToString("##,##"))" Sortable="true" Align="Align.Start" />
+                <PropertyColumn Title="Possible Deviation" Property="@(c => c.CalculateDeviation().ToString("##,## %"))" Sortable="true" Align="Align.Start" />
+                <PropertyColumn Title="Lower Bound" Property="@(c => c.LowerBound.Value.ToString("##,##"))" Sortable="true" Align="Align.Start" />
+                <PropertyColumn Title="Upper Bound" Property="@(c => c.UpperBound.Value.ToString("##,##"))" Sortable="true" Align="Align.Start" />
+
+            </FluentDataGrid>
+        </div>
+    </FluentGridItem>
+</FluentGrid>
+
+
+
+
+<FluentPaginator State="@pagination" CurrentPageIndexChanged="@(async () => await HandlePagination())">
+    <SummaryTemplate >
+        There are <strong>@(pagination.TotalItemCount ?? 0)</strong> rows
+    </SummaryTemplate>
+    <PaginationTextTemplate>
+        <strong>@(pagination.CurrentPageIndex + 1)</strong> / <strong>@(pagination.LastPageIndex + 1)</strong>
+    </PaginationTextTemplate>
+</FluentPaginator>
+
+
+
+@code {
+
+    // [Parameter] public string? salesChannelCode { get; set; }
+    [SupplyParameterFromQuery(Name = "c")] private string? companyId { get; set; }
+    [SupplyParameterFromQuery(Name = "sc")] private string? salesChannelCode { get; set; }
+
+    private FluentDataGrid<SalesForecastBySalesChannel> SalesForecastDataGrid = default!;
+    private IQueryable<SalesForecastBySalesChannel>? items = default!;
+    private SalesForecastBySalesChannel Filter = new SalesForecastBySalesChannel();
+    private Dictionary<string, string>? FilterQuery = new Dictionary<string, string>();
+
+    private PaginationState pagination = new PaginationState { ItemsPerPage = 3000 };
+
+    Func<SalesForecastBySalesChannel, string?> rowStyle = x => x.CalculateDeviation() > 0.2m ? "background-color: var(--highlight-bg)" : null;
+
+
+    private string nameFilter = string.Empty;
+
+    private GridSort<SalesForecastBySalesChannel> rankSort = GridSort<SalesForecastBySalesChannel>
+        .ByDescending(x => x.CompanyId)
+        .ThenDescending(x => x.SalesChannelCode);
+
+
+    // Uncomment line below when using the TemplateColumn example for the country _name
+    // private GridSort<SalesForecastBySalesChannel> nameSort = GridSort<SalesForecastBySalesChannel>.ByAscending(x => x.SalesChannelCode, StringLengthComparer.Instance);
+
+
+    private IQueryable<SalesForecastBySalesChannel>? FilteredItems => items;
+
+    protected override async Task OnParametersSetAsync()
+    {
+
+        // Filter.SalesChannelCode = salesChannelCode;
+
+        string filterQuery = $"SalesChannelCode={salesChannelCode}";
+
+        items = (await GetSalesForecastBySalesChannel(filterQuery)).AsQueryable();
+    }
+
+
+    private async Task HandlePagination()
+    {
+        // IsLoading = true;
+        SalesForecastDataGrid.SetLoadingState(true);
+        items = (await GetSalesForecastBySalesChannel()).AsQueryable();
+        // IsLoading = false;
+        SalesForecastDataGrid.SetLoadingState(false);
+    }
+
+    public async Task<IEnumerable<SalesForecastBySalesChannel>> GetSalesForecastBySalesChannel(string? filterQuery = null)
+    {
+
+        // await pagination.SetTotalItemCountAsync(3650);
+
+        Console.WriteLine(pagination.CurrentPageIndex);
+
+        // items = null;
+
+        DataState dataState = new DataState
+        {
+            Page = pagination.CurrentPageIndex,
+            PageSize = pagination.ItemsPerPage,
+            SortLabel = "Date"
+        };
+
+
+
+
+        // add to header as json
+        _client.DefaultRequestHeaders.Remove("X-Data-State");
+        _client.DefaultRequestHeaders.Add("X-Data-State", JsonSerializer.Serialize(dataState));
+
+        // add company id to client header
+        _client.DefaultRequestHeaders.Remove("X-Company-ID");
+        _client.DefaultRequestHeaders.Add("X-Company-ID", companyId);
+
+
+        var response = await _client.GetFromJsonAsync<Response<List<SalesForecastBySalesChannel>>>($"api/sales/forecast/sales-channel?SalesChannelCode={salesChannelCode}&{filterQuery}");
+
+
+        // await SalesForecastDataGrid.Pagination.SetTotalItemCountAsync(3650);
+        // StateHasChanged();
+
+        await pagination.SetTotalItemCountAsync(response.TotalItems);
+
+
+
+        // await InvokeAsync(StateHasChanged);
+
+
+        return response.Items;
+    }
+
+
+    private void UpdateFilterQueryWithReflection()
+    {
+        FilterQuery.Clear();
+
+        var properties = typeof(SalesForecastBySalesChannel).GetProperties();
+        foreach (var prop in properties)
+        {
+            var value = prop.GetValue(Filter);
+            if (value is string stringValue && !string.IsNullOrWhiteSpace(stringValue))
+            {
+                // Use the property name as key, e.g. "Code", "Name", etc.
+                FilterQuery[prop.Name] = stringValue;
+            }
+        }
+    }
+
+    private string BuildFilterQueryString(Dictionary<string, string>? filterDict)
+    {
+        if (filterDict == null || filterDict.Count == 0)
+            return string.Empty;
+
+        // Convert each key-value pair into "Filter.Key=URL-ENCODED-VALUE"
+        var queryParams = filterDict.Select(
+            kvp => $"Filter.{kvp.Key}={Uri.EscapeDataString(kvp.Value)}"
+        );
+
+        // Join them with '&' and prepend a '?'
+        return string.Join(" & ", queryParams);
+    }
+
+    private async Task HandleFilter() //ChangeEventArgs args
+    {
+
+        UpdateFilterQueryWithReflection();
+
+        // Build something like "?Filter.Code=ABC&Filter.Name=XYZ"
+        string queryString = BuildFilterQueryString(FilterQuery);
+        
+        items = (await GetSalesForecastBySalesChannel(queryString)).AsQueryable();
+
+    }
+
+
+    private void HandleClear()
+    {
+        if (string.IsNullOrWhiteSpace(nameFilter))
+        {
+            nameFilter = string.Empty;
+        }
+    }
+
+    private void HandleRowFocus(FluentDataGridRow<SalesForecastBySalesChannel> row)
+    {
+        Console.WriteLine($"[Custom comparer] Row focused: {row.Item?.SalesChannelCode}");
+    }
+
+    public class StringLengthComparer : IComparer<string>
+    {
+        public static readonly StringLengthComparer Instance = new StringLengthComparer();
+
+        public int Compare(string? x, string? y)
+        {
+            if (x is null)
+            {
+                return y is null ? 0 : -1;
+            }
+
+            if (y is null)
+            {
+                return 1;
+            }
+
+            return x.Length.CompareTo(y.Length);
+        }
+    }
+
+
+    
+
+
+}

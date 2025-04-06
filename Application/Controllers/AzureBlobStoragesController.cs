@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Application.Data;
+using Application.Shared.Data;
 using Application.Shared.Models.Admin;
 using Application.Shared.Services;
 using Application.Shared.Models;

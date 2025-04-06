@@ -1,25 +1,59 @@
 ﻿@using System.Security.Claims
-
-@* @rendermode InteractiveWebAssembly *@
-
+@using Microsoft.AspNetCore.SignalR.Client
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @implements IDisposable
-
-@inject NavigationManager NavigationManager
-
+@inject NavigationManager _navigation
 @inject StateContainer _stateContainer
 @inject HttpClient _client
 @inject ClientAuthenticationDetail _clientAuthenticationDetail
+
+@inject IToastService _toastService
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 
 <div class="navmenu">
     <input type="checkbox" title="Menu expand/collapse toggle" id="navmenu-toggle" class="navmenu-icon" />
     <label for="navmenu-toggle" class="navmenu-icon"><FluentIcon Value="@(new Icons.Regular.Size20.Navigation())" Color="Color.Fill" /></label>
     <nav class="sitenav" aria-labelledby="main-menu">
+
         <FluentNavMenu Id="main-menu" Width="250" Collapsible="true" Title="Navigation menu" @bind-Expanded="expanded" CustomToggle="true">
-            <FluentNavLink Href="/" Match="NavLinkMatch.All" Icon="@(new Icons.Regular.Size20.Home())" IconColor="Color.Accent">Home</FluentNavLink>
-            <FluentNavLink Href="rt/sales" Icon="@(new Icons.Regular.Size20.GanttChart())" IconColor="Color.Accent">Real Time Sales</FluentNavLink>
-            <FluentNavLink Href="data" Icon="@(new Icons.Regular.Size20.DataArea())" IconColor="Color.Accent">Data</FluentNavLink>
+
+            <FluentNavLink Href="@($"{queryParameter}")" Match="NavLinkMatch.All" Icon="@(new Icons.Regular.Size20.Home())" IconColor="Color.Accent">Home</FluentNavLink>
+            
+            <AuthorizeView Roles="@($"{companyId}_SALES")">
+                <Authorized>
+                    <FluentNavGroup Title="Sales" Tooltip="Sales" Icon="@(new Icons.Regular.Size24.Cart())">
+                        <FluentNavLink Href="@($"rt/sales{queryParameter}")" Icon="@(new Icons.Regular.Size20.Live())" IconColor="Color.Accent">Real Time Sales</FluentNavLink>
+                        <FluentNavLink Href="@($"sales/channels{queryParameter}")" Icon="@(new Icons.Regular.Size20.Location())" IconColor="Color.Accent">Sales Channels</FluentNavLink>
+                    </FluentNavGroup>
+                </Authorized>
+            </AuthorizeView>
+            
+
+            
+            
+           
+            <FluentNavLink Href="@($"items{queryParameter}")" Icon="@(new Icons.Regular.Size20.DataArea())" IconColor="Color.Accent">Items</FluentNavLink>
+            
+            <FluentNavGroup Title="Data" Tooltip="Data" Icon="@(new Icons.Regular.Size24.EarthLeaf())">
+                <FluentNavLink Href="@($"data/hosts/list{queryParameter}")" Icon="@(new Icons.Regular.Size20.Server())" IconColor="Color.Accent">Hosts</FluentNavLink>
+                <FluentNavLink Href="@($"data/databases/list{queryParameter}")" Icon="@(new Icons.Regular.Size20.Database())" IconColor="Color.Accent">Databases</FluentNavLink>
+                <FluentNavLink Href="@($"data/credentials/list{queryParameter}")" Icon="@(new Icons.Regular.Size20.Database())" IconColor="Color.Accent">Credentials</FluentNavLink>
+                <FluentNavLink Href="@($"data/queries/list{queryParameter}")" Icon="@(new Icons.Regular.Size20.TextAdd())" IconColor="Color.Accent">Queries</FluentNavLink>
+                <FluentNavLink Href="@($"data/custom{queryParameter}")" Icon="@(new Icons.Regular.Size20.DataArea())" IconColor="Color.Accent">Custom Data</FluentNavLink>
+            </FluentNavGroup>
+
+
+
+            <AuthorizeView Roles="@($"{companyId}_ADMIN")">
+                <Authorized>
+                    <FluentNavGroup Title="Admin" Tooltip="Admin" Icon="@(new Icons.Regular.Size24.PersonAccounts())">
+                        <FluentNavLink Href="@($"admin/users/list{queryParameter}")" Icon="@(new Icons.Regular.Size20.Person())" IconColor="Color.Accent">Users</FluentNavLink>
+                    </FluentNavGroup>
+                </Authorized>
+            </AuthorizeView>
+            
+            
             <AuthorizeView>
                 <Authorized>
                     <FluentNavLink Href="Account/Manage">@context.User.Identity?.Name</FluentNavLink>
@@ -38,15 +72,42 @@
     </nav>
 </div>
 
+<FluentMenuProvider />
+
+
 @code {
+
+    [SupplyParameterFromQuery(Name = "c")]
+    private string? companyId { get; set; }
+
     private bool expanded = true;
 
     private string? currentUrl;
 
+    private string queryParameter => _stateContainer.Company is null ? "" : $"?c={_stateContainer.Company.Id}";
+    ClaimsPrincipal ClaimsPrincipalUser;
+
     protected override async Task OnInitializedAsync()
     {
-        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-        NavigationManager.LocationChanged += OnLocationChanged;
+
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(_navigation.ToAbsoluteUri("/notification/datajob"))
+            .Build();
+
+        hubConnection.On<Notification<DataJob>>("ReceiveMessage", (notification) =>
+        {
+            // var encodedMsg = $"{message}";
+            // messages.Add(encodedMsg);
+            ShowToast(notification);
+            InvokeAsync(StateHasChanged);
+        });
+
+        await hubConnection.StartAsync();
+
+
+
+        currentUrl = _navigation.ToBaseRelativePath(_navigation.Uri);
+        _navigation.LocationChanged += OnLocationChanged;
 
         var userId = await _clientAuthenticationDetail.GetUserId();
 
@@ -60,21 +121,54 @@
                 Console.WriteLine("Customers INITIALIZE: User not authencated");
         }
 
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        ClaimsPrincipalUser = authState.User;
+
+        if (ClaimsPrincipalUser.Identity != null)
+        {
+            var useridentity = ClaimsPrincipalUser.Identity.Name;
+            var roles = ClaimsPrincipalUser.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList();
+
+            foreach(var role in roles)
+            {
+                Console.WriteLine($"Role: {role}");
+            }
+        }
+
         
 
         _stateContainer.OnChange += StateHasChanged;
     }
 
+    private HubConnection? hubConnection;
+    private List<string> messages = [];
+    private string? userInput;
+    private string? messageInput;
+
+
+    public bool IsConnected =>
+        hubConnection?.State == HubConnectionState.Connected;
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
-        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        currentUrl = _navigation.ToBaseRelativePath(e.Location);
         StateHasChanged();
     }
 
     public void Dispose()
     {
-        NavigationManager.LocationChanged -= OnLocationChanged;
+        _navigation.LocationChanged -= OnLocationChanged;
     }
+
 
 
 
@@ -90,6 +184,26 @@
 
         // // get the first company
         return companies.FirstOrDefault();
+    }
+
+
+
+    
+    void ShowToast(Notification<DataJob> notification)
+    {
+
+        _toastService.ShowCommunicationToast(new ToastParameters<CommunicationToastContent>()
+            {
+                Intent = ToastIntent.Success,
+                Title = notification.Data.Name,
+                Timeout = 4000,
+                Content = new CommunicationToastContent()
+                {
+                    Subtitle = notification.Message,
+                    Details = notification.Data.Duration,
+                },
+            });
+
     }
 
 }

@@ -1,5 +1,6 @@
 ﻿@inherits LayoutComponentBase
 @using System.Security.Claims
+@using Application.Shared.Services.Org
 @using Microsoft.AspNetCore.WebUtilities
 @inject NavigationManager _navigationManager
 @inject AuthenticationStateProvider _authenticationStateProvider
@@ -101,6 +102,10 @@
         {
             return;
         }
+        else
+        {
+            Console.WriteLine($"-----------------User ID: {userId}");
+        }
 
         var stateCompany = _stateContainer.Company;
 
@@ -117,6 +122,10 @@
         else
         {
             var company = await GetUserDefaultCompany(userId);
+
+
+            Console.WriteLine($"-----------------User ID: {company.Id}");
+
             _stateContainer.Company = company;
 
             // add ?c=x to the url
@@ -145,6 +154,7 @@
     {
         var companies = new List<Company>();
         try {
+
             companies = await _companyService.GetCompanies(userId);
         }
         catch(InvalidOperationException e)

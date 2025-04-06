@@ -2,12 +2,11 @@ using Application.Client.Pages;
 using Application.Components;
 using Application.Components.Account;
 using Application.Shared.Models.User;
-using Application.Data;
+using Application.Shared.Data;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.FluentUI.AspNetCore.Components;
-using Application.Services;
 using Application.Shared.Services;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using System.Security.Claims;
@@ -25,6 +24,14 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Application.Shared.Models.Data;
 using Application.Shared.Models;
 using Application.Helpers;
+using Application.Shared.Models.Org;
+using Application.Shared.Models.Sales;
+using Application.Shared.Services.Sales;
+using Application.Shared.Services.Org;
+using Application.Shared.Services.Data;
+using Application.Shared.Services.RealTime;
+using Application.Shared.Models.Inventory;
+using Application.Hubs;
 
 
 
@@ -124,13 +131,31 @@ builder.Services.AddScoped<ClientAuthenticationDetail>();
 
 builder.Services.AddScoped<ICompanyService, CompanyService>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<DatabaseService>();
 builder.Services.AddScoped<IDataService, DataService>();
 builder.Services.AddScoped<IAzureBlobService, AzureBlobService>();
 builder.Services.AddScoped<IRealTimeDataService, RealTimeDataService>();
 builder.Services.AddScoped<IUserDataService, UserDataService>();
+builder.Services.AddScoped<ISalesChannelService, SalesChannelService>();
+builder.Services.AddScoped<ISalesForecastService, SalesForecastService>();
+builder.Services.AddScoped<IItemService, ItemService>();
+builder.Services.AddScoped<IHostService, HostService>();
+builder.Services.AddScoped<IDatabaseService, DatabaseService>();
+builder.Services.AddScoped<IDatabaseCredentialService, DatabaseCredentialService>();
+builder.Services.AddScoped<ITableService, TableService>();
+builder.Services.AddScoped<ITableStorageUsageService, TableStorageUsageService>();
+builder.Services.AddScoped<ITableStorageUsageService, TableStorageUsageService>();
+builder.Services.AddScoped<IQueryDetailService, QueryDetailService>();
 
 builder.Services.AddScoped<QueryService<DataFile>>();
+builder.Services.AddScoped<QueryService<SalesChannel>>();
+builder.Services.AddScoped<QueryService<SalesForecastBySalesChannel>>();
+builder.Services.AddScoped<QueryService<Item>>();
+builder.Services.AddScoped<QueryService<Application.Shared.Models.Data.Host>>();
+builder.Services.AddScoped<QueryService<Database>>();
+builder.Services.AddScoped<QueryService<DatabaseCredential>>();
+builder.Services.AddScoped<QueryService<Table>>();
+builder.Services.AddScoped<QueryService<TableStorageUsage>>();
+builder.Services.AddScoped<QueryService<QueryDetail>>();
 
 
 
@@ -184,6 +209,12 @@ else
     app.UseHsts();
 }
 
+app.Use((context, next) =>
+{
+    context.Request.Scheme = "https";
+    return next();
+});
+
 app.UseHttpsRedirection();
 
 app.MapControllers();
@@ -192,6 +223,7 @@ app.UseStaticFiles();
 app.UseAntiforgery();
 
 app.MapHub<DataHub>("/datahub");
+app.MapHub<NotificationHub<DataJob>>("/notification/datajob");
 app.UseResponseCompression();
 
 app.MapRazorComponents<App>()

@@ -1,11 +1,12 @@
-﻿using Application.Data;
-using Application.Services;
+﻿using Application.Shared.Data;
+using Application.Shared.Services.Data;
+using Application.Shared.Services.RealTime;
 using Application.Shared.Models.RealTime;
-using Application.Shared.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
+using Application.Hubs;
 
 namespace Application.Controllers
 {
