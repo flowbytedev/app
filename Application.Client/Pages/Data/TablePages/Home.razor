@@ -2,6 +2,7 @@
 @inject NavigationManager _navigationManager
 @inject HttpClient _httpClient
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@attribute [Authorize]
 
 
 <Toolbar Title="Tables">
